@@ -1,27 +1,33 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics.Eventing.Reader;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace Translator
 {
-    
-    public enum TState { Start, Continue, Finish }; //тип состояния
-    public enum TCharType { EngLetter, RusLetter, Digit, EndRow, EndText, Space, Star, Slash, Exclamation, Equal, Semicolon, AnotherSymbol, OpenBracket, EndBracket, Colon, OpenSquadBracket, EndSquadBracket, Plus, Minus, Comma, Dot, NoInd}; // тип символа
+    // Перечисление состояний анализа
+    public enum TState { Start, Continue, Finish }; // Тип состояния
+    // Перечисление возможных типов символов
+    public enum TCharType { EngLetter, RusLetter, Digit, EndRow, EndText, Space, Star, Slash, Exclamation, Equal, Semicolon, AnotherSymbol, OpenBracket, EndBracket, Colon, OpenSquadBracket, EndSquadBracket, Plus, Minus, Comma, Dot, NoInd }; // Тип символа
+    // Перечисление типов токенов
     public enum TToken { lxmIdentifier, lxmNumber, lxmUnknown, lxmEmpty, lxmLeftParenth, lxmRightParenth, lxmIs, lxmDot, lxmComma };
-    public class CLex  //класс лексический анализатор
+
+    // Класс лексического анализатора
+    public class CLex
     {
-        private String[] strFSource;  // указатель на массив строк
-        private String[] strFMessage;  // указатель на массив строк
-        public TCharType enumFSelectionCharType;
-        public char chrFSelection;
-        private TState enumFState;
-        private int intFSourceRowSelection;
-        private int intFSourceColSelection;
-        private String strFLexicalUnit;
-        private TToken enumFToken;
+        // Поля класса
+        private String[] strFSource;  // Массив строк, представляющий исходный текст
+        private String[] strFMessage;  // Массив строк для сообщений (возможно, для вывода результатов)
+        public TCharType enumFSelectionCharType; // Тип текущего символа
+        public char chrFSelection; // Текущий символ
+        private TState enumFState; // Текущее состояние анализатора
+        private int intFSourceRowSelection; // Номер текущей строки
+        private int intFSourceColSelection; // Номер текущей колонки в строке
+        private String strFLexicalUnit; // Текущая лексическая единица
+        private TToken enumFToken; // Текущий токен
+
+        // Свойства для доступа к полям класса
         public String[] strPSource { set { strFSource = value; } get { return strFSource; } }
         public String[] strPMessage { set { strFMessage = value; } get { return strFMessage; } }
         public TState enumPState { set { enumFState = value; } get { return enumFState; } }
@@ -30,32 +36,40 @@ namespace Translator
         public int intPSourceRowSelection { get { return intFSourceRowSelection; } set { intFSourceRowSelection = value; } }
         public int intPSourceColSelection { get { return intFSourceColSelection; } set { intFSourceColSelection = value; } }
 
+        // Конструктор класса
         public CLex()
         {
         }
-        public void GetSymbol() //метод класса лексический анализатор
+
+        // Метод получения текущего символа из источника
+        public void GetSymbol()
         {
-            intFSourceColSelection++;
+            // Проверяем, не вышли ли за пределы строки
             if (intFSourceColSelection > strFSource[intFSourceRowSelection].Length - 1)
             {
-                intFSourceRowSelection++;
+                intFSourceRowSelection++; // Переходим на следующую строку
                 if (intFSourceRowSelection <= strFSource.Length - 1)
                 {
+                    // Если еще не конец текста, сбрасываем колонку и задаем символ конца строки
                     intFSourceColSelection = -1;
-                    chrFSelection = '\0';
-                    enumFSelectionCharType = TCharType.EndRow;
-                    enumFState = TState.Continue;
+                    chrFSelection = '\0'; // Устанавливаем текущий символ в '\0'
+                    enumFSelectionCharType = TCharType.EndRow; // Указываем, что достигнут конец строки
+                    enumFState = TState.Continue; // Состояние анализа продолжается
                 }
                 else
                 {
-                    chrFSelection = '\0';
-                    enumFSelectionCharType = TCharType.EndText;
-                    enumFState = TState.Finish;
+                    // Если достигли конца всего текста
+                    chrFSelection = '\0'; // Устанавливаем текущий символ в '\0'
+                    enumFSelectionCharType = TCharType.EndText; // Указываем, что достигнут конец текста
+                    enumFState = TState.Finish; // Меняем состояние на "Finish"
                 }
             }
             else
             {
-                chrFSelection = strFSource[intFSourceRowSelection][intFSourceColSelection]; //классификация прочитанной литеры
+                // Получаем текущий символ в строке
+                chrFSelection = strFSource[intFSourceRowSelection][intFSourceColSelection];
+
+                // Классифицируем символ
                 if (chrFSelection == ' ') enumFSelectionCharType = TCharType.Space;
                 else if (chrFSelection >= 'a' && chrFSelection <= 'z') enumFSelectionCharType = TCharType.EngLetter;
                 else if (chrFSelection >= 'а' && chrFSelection <= 'я') enumFSelectionCharType = TCharType.RusLetter;
@@ -66,7 +80,7 @@ namespace Translator
                 else if (chrFSelection == '=') enumFSelectionCharType = TCharType.Equal;
                 else if (chrFSelection == ';') enumFSelectionCharType = TCharType.Semicolon;
                 else if (chrFSelection == '(') enumFSelectionCharType = TCharType.OpenBracket;
-                else if (chrFSelection == ')') enumFSelectionCharType = TCharType.EngLetter;
+                else if (chrFSelection == ')') enumFSelectionCharType = TCharType.EndBracket;
                 else if (chrFSelection == ':') enumFSelectionCharType = TCharType.Colon;
                 else if (chrFSelection == '[') enumFSelectionCharType = TCharType.OpenSquadBracket;
                 else if (chrFSelection == ']') enumFSelectionCharType = TCharType.EndSquadBracket;
@@ -74,39 +88,49 @@ namespace Translator
                 else if (chrFSelection == '-') enumFSelectionCharType = TCharType.Minus;
                 else if (chrFSelection == ',') enumFSelectionCharType = TCharType.Comma;
                 else if (chrFSelection == '.') enumFSelectionCharType = TCharType.Dot;
-                else if (chrFSelection == '^' || chrFSelection == '%' || chrFSelection == '@' || chrFSelection == '<' || chrFSelection == '>' || chrFSelection == '?') enumFSelectionCharType = TCharType.AnotherSymbol;
-                else enumFSelectionCharType = TCharType.NoInd;
-                enumFState = TState.Continue;
+                else if (chrFSelection == '^' || chrFSelection == '%' || chrFSelection == '@' || chrFSelection == '<' || chrFSelection == '>' || chrFSelection == '?')
+                    enumFSelectionCharType = TCharType.AnotherSymbol; // Считаем эти символы как другие (AnotherSymbol)
+                else enumFSelectionCharType = TCharType.NoInd; // Символ не распознан
+                enumFState = TState.Continue; // Продолжаем анализ
             }
-            // intFSourceColSelection++;
+            intFSourceColSelection++; // Переходим к следующему символу
         }
 
+        // Метод добавления символа к текущей лексической единице
         private void TakeSymbol()
         {
-            char[] c = { chrFSelection };
-            String s = new string(c);
-            strFLexicalUnit += s;
-            GetSymbol();
+            char[] c = { chrFSelection }; // Создаем массив символов с текущим символом
+            String s = new string(c); // Преобразуем массив символов в строку
+            strFLexicalUnit += s; // Добавляем символ к текущей лексической единице
+            GetSymbol(); // Получаем следующий символ
         }
+
+        // Метод перехода к следующему токену
         public void NextToken()
         {
-            strFLexicalUnit = "";
+            strFLexicalUnit = ""; // Сбрасываем текущую лексическую единицу
+            char[] allowedChars = { 'a', 'b', 'c', 'd' };
+            // Начальная инициализация перед началом анализа
             if (enumFState == TState.Start)
             {
-                intFSourceRowSelection = 0;
-                intFSourceColSelection = -1;
-                GetSymbol();
+                intFSourceRowSelection = 0; // Устанавливаем начальную строку
+                intFSourceColSelection = -1; // Устанавливаем начальный столбец
+                GetSymbol(); // Получаем первый символ
             }
 
+            // Пропуск комментариев (если встречается '//')
             if (chrFSelection == '/')
             {
-                GetSymbol();
+                GetSymbol(); // Получаем следующий символ
                 if (chrFSelection == '/')
+                {
+                    // Игнорируем все символы до конца строки
                     while (enumFSelectionCharType != TCharType.EndRow)
                         GetSymbol();
-                GetSymbol();
+                    GetSymbol(); // Переходим к следующему символу после конца строки
+                }
             }
-            
+
             // Variant 13
             switch (enumFSelectionCharType)
             {
@@ -120,68 +144,61 @@ namespace Translator
                     //  Fin  |    |    |    |    |
                     A:
                         {
-                            if ((chrFSelection == 'a' || chrFSelection == 'b' || chrFSelection == 'c' || chrFSelection == 'd') && strFLexicalUnit.Length <= 4)
+                            if (allowedChars.Contains(chrFSelection))
                             {
                                 TakeSymbol();
                                 goto BFin;
                             }
-                            else if (strFLexicalUnit.Length <= 4)
+                            else
                             {
                                 enumFToken = TToken.lxmIdentifier;
                                 return;
                             }
-                            else throw new Exception("Слово должно быть не более 4 символов");
                         }
                     BFin:
                         {
-                            if ((chrFSelection == 'a' || chrFSelection == 'b' || chrFSelection == 'c' || chrFSelection == 'd') && strFLexicalUnit.Length <= 4)
+                            if (allowedChars.Contains(chrFSelection))
                             {
                                 TakeSymbol();
                                 goto CFin;
                             }
-                            else if (strFLexicalUnit.Length <= 4)
+                            else
                             {
                                 enumFToken = TToken.lxmIdentifier;
                                 return;
                             }
-                            else throw new Exception("Слово должно быть не более 4 символов");
                         }
                     CFin:
                         {
-                            if ((chrFSelection == 'a' || chrFSelection == 'b' || chrFSelection == 'c' || chrFSelection == 'd') && strFLexicalUnit.Length <= 4)
+                            if (allowedChars.Contains(chrFSelection))
                             {
                                 TakeSymbol();
                                 goto D;
                             }
-                            else if (strFLexicalUnit.Length <= 4)
+                            else
                             {
                                 enumFToken = TToken.lxmIdentifier;
                                 return;
                             }
-                            else
-                                throw new Exception("Слово должно быть не более 4 символов");
                         }
 
                     D:
                         {
-                            if ((chrFSelection == 'a' || chrFSelection == 'b' || chrFSelection == 'c' || chrFSelection == 'd') && strFLexicalUnit.Length <= 4)
+                            if (allowedChars.Contains(chrFSelection))
                             {
                                 TakeSymbol();
                                 goto Fin;
                             }
-                            else if (strFLexicalUnit.Length <= 4)
+                            else
                             {
                                 enumFToken = TToken.lxmIdentifier;
                                 return;
                             }
-                            else throw new Exception("Слово должно быть не более 4 символов");
                         }
                     Fin:
                         {
-
                             enumFToken = TToken.lxmIdentifier;
                             return;
-                           // throw new Exception("Слово должно быть не более 4 символов");
                         }
                     }
                     if (chrFSelection == '/')

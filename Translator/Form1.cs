@@ -14,33 +14,33 @@ namespace Translator
         public Form1()
         {
             InitializeComponent();
-            tbFSource.Text = "";
-            tbFSource.Text = "";
-            int n = tbFSource.Lines.Length;
+            int n = tbFSource.Lines.Length; // Получение количества строк в tbFSource
         }
 
+        // Обработчик события нажатия на кнопку btnFStart
         private void btnFStart_Click(object sender, EventArgs e)
         {
+            // Создание экземпляра класса CLex для анализа текста
             CLex Lex = new CLex();
-            Lex.strPSource = tbFSource.Lines;
-            Lex.strPMessage = tbFMessage.Lines;
+            Lex.strPSource = tbFSource.Lines; // Устанавливаем источник текста из текстового поля tbFSource
+            Lex.strPMessage = tbFMessage.Lines; // Устанавливаем сообщения из текстового поля tbFMessage
 
-            Lex.intPSourceColSelection = -1; // Добавление ЛР2
-            Lex.intPSourceRowSelection = 0; 
-
-
-            int x = tbFSource.TextLength;
-            int y = tbFSource.Lines.Length;
-            tbFMessage.Text = "";
+            int x = tbFSource.TextLength; // Получаем количество символов в tbFSource
+            int y = tbFSource.Lines.Length; // Получаем количество строк в tbFSource
+            tbFMessage.Text = ""; // Очищаем tbFMessage для нового результата
 
             try
             {
+                // Цикл продолжается, пока состояние парсера не станет "Finish"
                 while (Lex.enumPState != TState.Finish)
                 {
-                    Lex.GetSymbol(); // Выводятся литеры и классификация
-                    Lex.NextToken();
-                    String s = "";
-                    String s1 = "";
+                    Lex.GetSymbol(); // Получение текущего символа из исходного текста
+                    Lex.NextToken(); // Получение следующего токена
+
+                    String s = ""; // Переменная для хранения литеры
+                    String s1 = ""; // Переменная для хранения типа литеры
+
+                    // Определение типа символа и присваивание значений переменным s и s1
 
                     //switch (Lex.enumFSelectionCharType)
                     //{
@@ -66,27 +66,35 @@ namespace Translator
                     //    case TCharType.EndRow: { s = "KC"; s1 = "EndRow"; break; }
                     //    case TCharType.EndText: { s = "KT"; s1 = "EndText"; break; }
                     //}
-                        switch (Lex.enumPToken)
+                    switch (Lex.enumPToken)
                         {
                             case TToken.lxmNumber: { s = "LxmNumber"; s1 = Lex.strPLexicalUnit; break; }
                             case TToken.lxmIdentifier: { s = "lxmId"; s1 = Lex.strPLexicalUnit; break; }
                         }
-                    String m = "(" + s + "," + s1 + ")"; //литера и ее тип
-                    tbFMessage.Text += m; //добавляется в строку сообщение
+                    // Создание строки с литерой и ее типом
+                    String m = "(" + s + "," + s1 + ")";
 
+                    // Добавление строки в tbFMessage
+                    tbFMessage.Text += m;
                 }
             }
-            catch (Exception exc)
+            catch (Exception exc) // Обработка исключений
             {
+                // Добавление сообщения об ошибке в tbFMessage
                 tbFMessage.Text += exc.Message;
-                tbFSource.Select();
-                tbFSource.SelectionStart = 0;
+
+                tbFSource.Select(); // Устанавливаем фокус на tbFSource
+                tbFSource.SelectionStart = 0; // Устанавливаем начальную позицию выделения
                 int n = 0;
-                for (int i = 0; i < Lex.intPSourceRowSelection; i++) n += tbFSource.Lines[i].Length + 2;
-                n += Lex.intPSourceColSelection;
-                tbFSource.SelectionLength = n;
+
+                // Подсчет количества символов для выделения текста до текущей позиции
+                for (int i = 0; i < Lex.intPSourceRowSelection; i++)
+                    n += tbFSource.Lines[i].Length + 2; // +2 учитывает переход на новую строку
+
+                n += Lex.intPSourceColSelection; // Добавляем текущую позицию в строке
+                tbFSource.SelectionLength = n; // Устанавливаем длину выделения
             }
         }
     }
-
 }
+
