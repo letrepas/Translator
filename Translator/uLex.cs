@@ -55,7 +55,6 @@ namespace Translator
             }
             else
             {
-
                 chrFSelection = strFSource[intFSourceRowSelection][intFSourceColSelection]; //классификация прочитанной литеры
                 if (chrFSelection == ' ') enumFSelectionCharType = TCharType.Space;
                 else if (chrFSelection >= 'a' && chrFSelection <= 'z') enumFSelectionCharType = TCharType.EngLetter;
@@ -116,7 +115,7 @@ namespace Translator
                     //         a    b    c    d
                     //   A   |BFin|BFin|BFin|BFin|
                     //  BFin |CFin|CFin|cFin|CFin|
-                    //  CFin |CFin|CFin|CFin|CFin|
+                    //  CFin |  D |  D |  D |  D |
                     //   D   |Fin | Fin| Fin| Fin|
                     //  Fin  |    |    |    |    |
                     A:
