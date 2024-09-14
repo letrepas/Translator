@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.Eventing.Reader;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace Translator
 {
+    
     public enum TState { Start, Continue, Finish }; //тип состояния
     public enum TCharType { EngLetter, RusLetter, Digit, EndRow, EndText, Space, Star, Slash, Exclamation, Equal, Semicolon, AnotherSymbol, OpenBracket, EndBracket, Colon, OpenSquadBracket, EndSquadBracket, Plus, Minus, Comma, Dot, NoInd}; // тип символа
     public enum TToken { lxmIdentifier, lxmNumber, lxmUnknown, lxmEmpty, lxmLeftParenth, lxmRightParenth, lxmIs, lxmDot, lxmComma };
@@ -33,6 +35,7 @@ namespace Translator
         }
         public void GetSymbol() //метод класса лексический анализатор
         {
+            intFSourceColSelection++;
             if (intFSourceColSelection > strFSource[intFSourceRowSelection].Length - 1)
             {
                 intFSourceRowSelection++;
@@ -52,6 +55,7 @@ namespace Translator
             }
             else
             {
+
                 chrFSelection = strFSource[intFSourceRowSelection][intFSourceColSelection]; //классификация прочитанной литеры
                 if (chrFSelection == ' ') enumFSelectionCharType = TCharType.Space;
                 else if (chrFSelection >= 'a' && chrFSelection <= 'z') enumFSelectionCharType = TCharType.EngLetter;
@@ -75,7 +79,7 @@ namespace Translator
                 else enumFSelectionCharType = TCharType.NoInd;
                 enumFState = TState.Continue;
             }
-            intFSourceColSelection++;
+            // intFSourceColSelection++;
         }
 
         private void TakeSymbol()
@@ -103,6 +107,211 @@ namespace Translator
                         GetSymbol();
                 GetSymbol();
             }
+            
+            // Variant 13
+            switch (enumFSelectionCharType)
+            {
+                case TCharType.EngLetter:
+                    {
+                    //         a    b    c    d
+                    //   A   |BFin|BFin|BFin|BFin|
+                    //  BFin |CFin|CFin|cFin|CFin|
+                    //  CFin |CFin|CFin|CFin|CFin|
+                    //   D   |Fin | Fin| Fin| Fin|
+                    //  Fin  |    |    |    |    |
+                    A:
+                        {
+                            if ((chrFSelection == 'a' || chrFSelection == 'b' || chrFSelection == 'c' || chrFSelection == 'd') && strFLexicalUnit.Length <= 4)
+                            {
+                                TakeSymbol();
+                                goto BFin;
+                            }
+                            else if (strFLexicalUnit.Length <= 4)
+                            {
+                                enumFToken = TToken.lxmIdentifier;
+                                return;
+                            }
+                            else throw new Exception("Слово должно быть не более 4 символов");
+                        }
+                    BFin:
+                        {
+                            if ((chrFSelection == 'a' || chrFSelection == 'b' || chrFSelection == 'c' || chrFSelection == 'd') && strFLexicalUnit.Length <= 4)
+                            {
+                                TakeSymbol();
+                                goto CFin;
+                            }
+                            else if (strFLexicalUnit.Length <= 4)
+                            {
+                                enumFToken = TToken.lxmIdentifier;
+                                return;
+                            }
+                            else throw new Exception("Слово должно быть не более 4 символов");
+                        }
+                    CFin:
+                        {
+                            if ((chrFSelection == 'a' || chrFSelection == 'b' || chrFSelection == 'c' || chrFSelection == 'd') && strFLexicalUnit.Length <= 4)
+                            {
+                                TakeSymbol();
+                                goto D;
+                            }
+                            else if (strFLexicalUnit.Length <= 4)
+                            {
+                                enumFToken = TToken.lxmIdentifier;
+                                return;
+                            }
+                            else
+                                throw new Exception("Слово должно быть не более 4 символов");
+                        }
+
+                    D:
+                        {
+                            if ((chrFSelection == 'a' || chrFSelection == 'b' || chrFSelection == 'c' || chrFSelection == 'd') && strFLexicalUnit.Length <= 4)
+                            {
+                                TakeSymbol();
+                                goto Fin;
+                            }
+                            else if (strFLexicalUnit.Length <= 4)
+                            {
+                                enumFToken = TToken.lxmIdentifier;
+                                return;
+                            }
+                            else throw new Exception("Слово должно быть не более 4 символов");
+                        }
+                    Fin:
+                        {
+
+                            enumFToken = TToken.lxmIdentifier;
+                            return;
+                           // throw new Exception("Слово должно быть не более 4 символов");
+                        }
+                    }
+                    if (chrFSelection == '/')
+                    {
+                        GetSymbol();
+                        if (chrFSelection == '/')
+                            while (enumFSelectionCharType != TCharType.EndRow)
+                            {
+                                GetSymbol();
+                            }
+                        GetSymbol();
+                    }
+                case TCharType.Digit:
+                    {
+                    //           0     1  
+                    //    A   |  B  |  C  |
+                    //    B   |  D  |     |
+                    //    C   |  E  |     |
+                    //    D   |     |  A  |
+                    //    E   |     |FFin |
+                    //   FFin |     |  G  |
+                    //    G   |  H  |     |
+                    //    H   | FFin|     |
+
+                    A:
+                        if (chrFSelection == '0')
+                        {
+                            TakeSymbol();
+                            goto B;
+                        }
+                        else if (chrFSelection == '1')
+                        {
+                            TakeSymbol();
+                            goto C;
+                        }
+                        else throw new Exception("Ожидался 0 или 1");
+
+                        B:
+                        if (chrFSelection == '0')
+                        {
+                            TakeSymbol();
+                            goto D;
+                        }
+                        else throw new Exception("Ожидался 0");
+
+                        C:
+                        if (chrFSelection == '0')
+                        {
+                            TakeSymbol();
+                            goto E;
+                        }
+                        else throw new Exception("Ожидался 0");
+
+                        D:
+                        if (chrFSelection == '1')
+                        {
+                            TakeSymbol();
+                            goto A;
+                        }
+                        else throw new Exception("Ожидалась 1");
+
+                        E:
+                        if (chrFSelection == '1')
+                        {
+                            TakeSymbol();
+                            goto FFin;
+                        }
+                        else throw new Exception("Ожидалась 1");
+
+                        FFin:
+                        if (chrFSelection == '1')
+                        {
+                            TakeSymbol();
+                            goto G;
+                        }
+                        else if (enumFSelectionCharType != TCharType.Digit) { enumFToken = TToken.lxmNumber; return; }
+                        else throw new Exception("Ожидалась 1");
+
+                        G:
+                        if (chrFSelection == '1')
+                        {
+                            TakeSymbol();
+                            goto H;
+                        }
+                        else throw new Exception("Ожидался 0");
+
+
+                        H:
+                        if (chrFSelection == '0')
+                        {
+                            TakeSymbol();
+                            goto FFin;
+                        }
+                        else throw new Exception("Ожидался 0");
+
+                    }
+                case TCharType.AnotherSymbol:
+                    {
+                        if (chrFSelection == '/')
+                        {
+                            GetSymbol();
+                            if (chrFSelection == '/')
+                            {
+                                while (enumFSelectionCharType != TCharType.EndRow)
+                                    GetSymbol();
+                            }
+                            GetSymbol();
+                        }
+                        if (chrFSelection == '(')
+                        {
+                            enumFToken = TToken.lxmLeftParenth;
+                            GetSymbol();
+                            return;
+                        }
+                        if (chrFSelection == ')')
+                        {
+                            enumFToken = TToken.lxmRightParenth;
+                            GetSymbol();
+                            return;
+                        }
+                        break;
+                    }
+                case TCharType.EndText:
+                    {
+                        enumFToken = TToken.lxmEmpty;
+                        break;
+                    }
+            }
+
         }
     }
 
