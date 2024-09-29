@@ -9,11 +9,10 @@ namespace Translator
     // Перечисление состояний анализа
     public enum TState { Start, Continue, Finish }; // Тип состояния
     // Перечисление возможных типов символов
-    public enum TCharType { EngLetter, RusLetter, Digit, EndRow, EndText, Space, Star, Slash, Exclamation, Equal, Semicolon, AnotherSymbol, OpenBracket, EndBracket, Colon, OpenSquadBracket, EndSquadBracket, Plus, Minus, Comma, Dot, NoInd }; // Тип символа
+    public enum TCharType { EngLetter, RusLetter, Digit, SETQ, CL, EndRow, EndText, Space, Star, Slash, Exclamation, Equal, Semicolon, AnotherSymbol, OpenBracket, EndBracket, Colon, OpenSquadBracket, EndSquadBracket, Plus, Minus, Comma, Dot, NoInd }; // Тип символа
     // Перечисление типов токенов
-    public enum TToken { lxmIdentifier, lxmNumber, lxmUnknown, lxmEmpty, lxmLeftParenth, lxmRightParenth, lxmIs, lxmDot, lxmComma };
+    public enum TToken { lxmIdentifier, lxmSETQ, lxmCL, lxmNumber, lxmUnknown, lxmEmpty, lxmLeftParenth, lxmRightParenth, lxmIs, lxmDot, lxmComma, lxmText, lxmtz, lxmdt, lxmr, lxmrs, lxmls };
 
-    // Класс лексического анализатора
     public class CLex
     {
         // Поля класса
@@ -74,6 +73,8 @@ namespace Translator
                 else if (chrFSelection >= 'a' && chrFSelection <= 'z') enumFSelectionCharType = TCharType.EngLetter;
                 else if (chrFSelection >= 'а' && chrFSelection <= 'я') enumFSelectionCharType = TCharType.RusLetter;
                 else if (chrFSelection >= '0' && chrFSelection <= '9') enumFSelectionCharType = TCharType.Digit;
+                else if (chrFSelection == 'S' || chrFSelection == 'E' || chrFSelection == 'T' || chrFSelection == 'Q') enumFSelectionCharType = TCharType.SETQ;
+                else if (chrFSelection == 'C' || chrFSelection == 'E' || chrFSelection == 'O' || chrFSelection == 'M' || chrFSelection == 'A' || chrFSelection == 'N' || chrFSelection == 'D' || chrFSelection == 'L' || chrFSelection == 'I' || chrFSelection == '"') enumFSelectionCharType = TCharType.CL;
                 else if (chrFSelection == '/') enumFSelectionCharType = TCharType.Slash;
                 else if (chrFSelection == '*') enumFSelectionCharType = TCharType.Star;
                 else if (chrFSelection == '!') enumFSelectionCharType = TCharType.Exclamation;
@@ -110,6 +111,8 @@ namespace Translator
         {
             strFLexicalUnit = ""; // Сбрасываем текущую лексическую единицу
             char[] allowedChars = { 'a', 'b', 'c', 'd' };
+            char[] SETQChars = { 'S', 'E', 'T', 'Q' };
+            char[] CLChars = { 'C', 'O', 'M', 'A', 'N', 'D', 'L', 'I', 'E', '"'};
             // Начальная инициализация перед началом анализа
             if (enumFState == TState.Start)
             {
@@ -295,6 +298,157 @@ namespace Translator
                         else throw new Exception("Ожидался 0");
 
                     }
+
+                case TCharType.SETQ:
+                    {
+                        A:
+                            if (chrFSelection == 'S')
+                            {
+                                TakeSymbol();
+                                goto B;
+                            }
+                            else throw new Exception("Ожидался S");
+                        B:
+                            if (chrFSelection == 'E')
+                            {
+                                TakeSymbol();
+                                goto C;
+                            }
+                            else throw new Exception("Ожидался E");
+                        C:
+                            if (chrFSelection == 'T')
+                            {
+                                TakeSymbol();
+                                goto D;
+                            }
+                            else throw new Exception("Ожидался T");
+
+                        D:
+                            if (chrFSelection == 'Q')
+                            {
+                                TakeSymbol();
+                                goto Fin;
+                            }
+                            else throw new Exception("Ожидался Q");
+
+                        Fin:
+                            {
+                                enumFToken = TToken.lxmSETQ;
+                                return;
+                            }
+                    }
+                case TCharType.CL:
+                    {
+                    A:
+                        if (chrFSelection == 'C')
+                        {
+                            TakeSymbol();
+                            goto B;
+                        }
+                        else throw new Exception("Ожидался C");
+                    B:
+                        if (chrFSelection == 'O')
+                        {
+                            TakeSymbol();
+                            goto C;
+                        }
+                        else throw new Exception("Ожидался O");
+                    C:
+                        if (chrFSelection == 'M')
+                        {
+                            TakeSymbol();
+                            goto D;
+                        }
+                        else throw new Exception("Ожидался M");
+
+                    D:
+                        if (chrFSelection == 'M')
+                        {
+                            TakeSymbol();
+                            goto E;
+                        }
+                        else throw new Exception("Ожидался M");
+
+                        E:
+                        if (chrFSelection == 'A')
+                        {
+                            TakeSymbol();
+                            goto F;
+                        }
+                        else throw new Exception("Ожидался A");
+
+                        F:
+                        if (chrFSelection == 'N')
+                        {
+                            TakeSymbol();
+                            goto G;
+                        }
+                        else throw new Exception("Ожидался N");
+
+                        G:
+                        if (chrFSelection == 'D')
+                        {
+                            TakeSymbol();
+                            goto H;
+                        }
+                        else throw new Exception("Ожидался D");
+
+                        H:
+                        if (chrFSelection == '"')
+                        {
+                            TakeSymbol();
+                            goto I;
+                        }
+                        else throw new Exception("Ожидался \"");
+
+                        I:
+                        if (chrFSelection == 'L')
+                        {
+                            TakeSymbol();
+                            goto J;
+                        }
+                        else throw new Exception("Ожидался L");
+
+                        J:
+                        if (chrFSelection == 'I')
+                        {
+                            TakeSymbol();
+                            goto K;
+                        }
+                        else throw new Exception("Ожидался I");
+
+                        K:
+                        if (chrFSelection == 'N')
+                        {
+                            TakeSymbol();
+                            goto L;
+                        }
+                        else throw new Exception("Ожидался N");
+
+                        L:
+                        if (chrFSelection == 'E')
+                        {
+                            TakeSymbol();
+                            goto M;
+                        }
+                        else throw new Exception("Ожидался E");
+
+                        M:
+                        if (chrFSelection == '"')
+                        {
+                            TakeSymbol();
+                            goto Fin;
+                        }
+                        else throw new Exception("Ожидался \"");
+
+                        Fin:
+                        {
+                            enumFToken = TToken.lxmCL;
+                            return;
+                        }
+                     }
+
+
                 case TCharType.AnotherSymbol:
                     {
                         if (chrFSelection == '/')
