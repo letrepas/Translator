@@ -32,15 +32,22 @@ namespace Translator
                 Synt.S();
                 throw new Exception("Текст верный");
             }
-            catch (Exception exc)
+
+            catch (Exception exc) // Обработка исключений
             {
+                // Добавление сообщения об ошибке в tbFMessage
                 tbFMessage.Text += exc.Message;
-                tbFSource.Select();
-                tbFSource.SelectionStart = 0;
+
+                tbFSource.Select(); // Устанавливаем фокус на tbFSource
+                tbFSource.SelectionStart = 0; // Устанавливаем начальную позицию выделения
                 int n = 0;
-                for (int i = 0; i < Synt.Lex.intPSourceRowSelection; i++) n += tbFSource.Lines[i].Length + 2;
-                n += Synt.Lex.intPSourceColSelection;
-                tbFSource.SelectionLength = n;
+
+                // Подсчет количества символов для выделения текста до текущей позиции
+                for (int i = 0; i < Synt.Lex.intPSourceRowSelection; i++)
+                    n += tbFSource.Lines[i].Length + 2; // +2 учитывает переход на новую строку
+
+                n += Synt.Lex.intPSourceColSelection; // Добавляем текущую позицию в строке
+                tbFSource.SelectionLength = n; // Устанавливаем длину выделения
             }
         }
 
