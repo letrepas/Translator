@@ -274,7 +274,7 @@ namespace Translator
                             TakeSymbol();
                             goto H;
                         }
-                        else throw new Exception("Ожидался 0");// 
+                        else throw new Exception("Ожидался 0");
 
 
                         H:
