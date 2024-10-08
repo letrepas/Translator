@@ -53,11 +53,9 @@
     <Compile Include="Form1.Designer.cs">
       <DependentUpon>Form1.cs</DependentUpon>
     </Compile>
-    <Compile Include="Hash.Tables.cs" />
-    <Compile Include="HashTablesList.cs" />
+    <Compile Include="MyHash.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="THeap.cs" />
     <Compile Include="uLex.cs" />
     <Compile Include="uSyntAnalyzer.cs" />
     <EmbeddedResource Include="Form1.resx">

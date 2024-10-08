@@ -53,24 +53,34 @@ namespace nsSynt
                     }
                     else throw new Exception("Ожидался пробел после SETQ");
                 }
-                else if (Lex.enumPToken == TToken.lxmCL)  // разбор COMMAND "LINE"
+                else if (Lex.enumPToken == TToken.lxmCL)  // разбор COMMAND"LINE"
                 {
                     Lex.NextToken();  // переходим к следующему токену после COMMAND
-                    if (Lex.enumPToken == TToken.lxmIdentifier)  // ожидаем первый индефикатор
+                    if (Lex.enumPToken == TToken.lxmSpace)  // проверка на пробел
                     {
                         Lex.NextToken();
-                        if (Lex.enumPToken == TToken.lxmIdentifier)  // ожидаем второй индефикатор
+                        if (Lex.enumPToken == TToken.lxmIdentifier)  // ожидаем первый индефикатор
                         {
                             Lex.NextToken();
-                            if (Lex.enumPToken == TToken.lxmEndBracket)  // проверка на закрывающую скобку
+                            if (Lex.enumPToken == TToken.lxmSpace)  // проверка на пробел
                             {
-                                Lex.NextToken();  // завершаем разбор COMMAND "LINE"
+                                Lex.NextToken();
+                                if (Lex.enumPToken == TToken.lxmIdentifier)  // ожидаем второй индефикатор
+                                {
+                                    Lex.NextToken();
+                                    if (Lex.enumPToken == TToken.lxmEndBracket)  // проверка на закрывающую скобку
+                                    {
+                                        Lex.NextToken();  // завершаем разбор COMMAND "LINE"
+                                    }
+                                    else throw new Exception("Ожидалась закрывающая скобка");
+                                }
+                                else throw new Exception("Ожидался второй индефикатор для LINE");
                             }
-                            else throw new Exception("Ожидалась закрывающая скобка");
+                            else throw new Exception("Ожидался пробел после первого индефикатора");
                         }
-                        else throw new Exception("Ожидался второй индефикатор для LINE");
+                        else throw new Exception("Ожидался первый индефикатор для LINE");
                     }
-                    else throw new Exception("Ожидался первый индефикатор для LINE");
+                    else throw new Exception("Ожидался пробел после COMMAND\"LINE\"");
                 }
                 else throw new Exception("Ожидался SETQ или COMMAND");
             }

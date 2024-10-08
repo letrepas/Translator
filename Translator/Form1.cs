@@ -1,5 +1,4 @@
-﻿using nsHashTables;
-using nsSynt;
+﻿using nsSynt;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -7,7 +6,8 @@ using System.Data;
 using System.Drawing;
 using System.Text;
 using System.Windows.Forms;
-
+using laba4;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 
 namespace Translator
 {
@@ -18,7 +18,10 @@ namespace Translator
             InitializeComponent();
             int n = tbFSource.Lines.Length; // Получение количества строк в tbFSource
         }
-        public CHashTableList htl = new CHashTableList(3);
+        Dictionary<string, List<string>> hashTableIdentifier = new Dictionary<string, List<string>>();
+        Dictionary<string, List<string>> hashTableDigital = new Dictionary<string, List<string>>();
+        Dictionary<string, List<string>> hashTableSpecial = new Dictionary<string, List<string>>();
+        public MyHash hashFunction = new MyHash();
         public void TablesToMemo(object sender, System.EventArgs e)
         {
             List<string> listTable = new List<string>();
@@ -27,20 +30,17 @@ namespace Translator
             listBox2.Items.Clear();
             listBox3.Items.Clear();
 
-            htl.TableToStringList(0, listTable);
-            for (int i = 0; i < listTable.Count; i++)
-                listBox1.Items.Add(listTable[i]);
+            foreach (var entry in hashTableIdentifier)
+                listBox1.Items.Add(string.Join(", ", entry.Value));
             listTable.Clear();
 
-            htl.TableToStringList(1, listTable);
-            for (int i = 0; i < listTable.Count; i++)
-                listBox2.Items.Add(listTable[i]);
+            foreach (var entry in hashTableDigital)
+                listBox2.Items.Add(string.Join(", ", entry.Value));
+            listTable.Clear();
+            foreach (var entry in hashTableSpecial)
+                listBox3.Items.Add(string.Join(", ", entry.Value));
             listTable.Clear();
 
-            htl.TableToStringList(2, listTable);
-            for (int i = 0; i < listTable.Count; i++)
-                listBox3.Items.Add(listTable[i]);
-            listTable.Clear();
         }
 
         private void btnFStart_Click(object sender, EventArgs e)
@@ -95,48 +95,44 @@ namespace Translator
                     {
                         case TToken.lxmIdentifier:
                             {
+                                hashFunction.AddWord(hashTableIdentifier, Lex.strPLexicalUnit);
                                 s1 = "id " + Lex.strPLexicalUnit; int b = 0;
-                                if (htl.AddLexicalUnit(Lex.strPLexicalUnit, 0, ref b))
-                                {
-                                    TablesToMemo(this, e);
-                                }
+                                TablesToMemo(this, e);
                                 break;
                             }
                         case TToken.lxmNumber:
                             {
+                                hashFunction.AddWord(hashTableDigital, Lex.strPLexicalUnit);
                                 s1 = "num " + Lex.strPLexicalUnit; int b = 0;
-                                if (htl.AddLexicalUnit(Lex.strPLexicalUnit, 1, ref b))
-                                {
-                                    TablesToMemo(this, e);
-                                }
+                                TablesToMemo(this, e);
                                 break;
                             }
                         case TToken.lxmEndBracket:
                             {
+                                hashFunction.AddWord(hashTableSpecial, ")");
                                 s1 = "spec ) " + Lex.strPLexicalUnit; int b = 0;
-                                if (htl.AddLexicalUnit(")", 2, ref b))
-                                {
-                                    TablesToMemo(this, e);
-                                }
+                                TablesToMemo(this, e);
                                 break;
                             }
                         case TToken.lxmOpenBracket:
                             {
+                                hashFunction.AddWord(hashTableSpecial, "(");
                                 s1 = "spec ( " + Lex.strPLexicalUnit; int b = 0;
-                                if (htl.AddLexicalUnit("(", 2, ref b))
-                                {
-                                    TablesToMemo(this, e);
-                                }
+                                TablesToMemo(this, e);
                                 break;
                             }
                         case TToken.lxmCL:
+                            {
+                                hashFunction.AddWord(hashTableSpecial, "COMMAND\"LINE\"");
+                                s1 = "spec " + Lex.strPLexicalUnit; int b = 0;
+                                TablesToMemo(this, e);
+                                break;
+                            }
                         case TToken.lxmSETQ:
                             {
+                                hashFunction.AddWord(hashTableSpecial, "SETQ");
                                 s1 = "spec " + Lex.strPLexicalUnit; int b = 0;
-                                if (htl.AddLexicalUnit(Lex.strPLexicalUnit, 2, ref b))
-                                {
-                                    TablesToMemo(this, e);
-                                }
+                                TablesToMemo(this, e);
                                 break;
                             }
                     }
@@ -156,7 +152,102 @@ namespace Translator
             }
         }
 
+        private void deleteButton_Click(object sender, EventArgs e)
+        {
+            ListBox selectedListBox = GetSelectedListBox(); // Определяем выбранный ListBox
+            Dictionary<string, List<string>> selectedHashTable = GetSelectedHashTable(selectedListBox); // Получаем нужную хэш-таблицу
+
+            if (selectedListBox != null && selectedHashTable != null && selectedListBox.SelectedItem != null)
+            {
+                string selectedItem = selectedListBox.SelectedItem.ToString();
+
+                // Удаляем выбранное слово из соответствующей хэш-таблицы
+                if (hashFunction.RemoveWord(selectedHashTable, selectedItem))
+                    deleteButton.BackColor = Color.Green;
+                else
+                    deleteButton.BackColor = Color.Red;
+            }
+            else
+                deleteButton.BackColor = Color.Red;
+        }
+
+        private void reloadButton_Click(object sender, EventArgs e)
+        {
+            listBox1.Items.Clear();
+            listBox2.Items.Clear();
+            listBox3.Items.Clear();
+            foreach (var entry in hashTableIdentifier)
+                listBox1.Items.Add(string.Join(", ", entry.Value));
+            foreach (var entry in hashTableDigital)
+                listBox2.Items.Add(string.Join(", ", entry.Value));
+            foreach (var entry in hashTableSpecial)
+                listBox3.Items.Add(string.Join(", ", entry.Value));
+        }
+
+        private void findButton_Click(object sender, EventArgs e)
+        {
+            ListBox selectedListBox = GetSelectedListBox();
+            Dictionary<string, List<string>> selectedHashTable = GetSelectedHashTable(selectedListBox); // Метод для получения нужной хэш-таблицы
+
+            if (selectedHashTable != null && selectedListBox.SelectedItem != null)
+            {
+                string selectedItem = selectedListBox.SelectedItem.ToString();
+                if (hashFunction.SearchWord(selectedHashTable, selectedItem))
+                    findButton.BackColor = Color.Green;
+                else
+                    findButton.BackColor = Color.Red;
+            }
+        }
+
+        private void changeButton_Click(object sender, EventArgs e)
+        {
+            ListBox selectedListBox = GetSelectedListBox(); // Метод для определения выбранного ListBox
+            Dictionary<string, List<string>> selectedHashTable = GetSelectedHashTable(selectedListBox); // Метод для получения нужной хэш-таблицы
+
+            if (selectedListBox != null && selectedHashTable != null && selectedListBox.SelectedItem != null)
+            {
+                string selectedItem = selectedListBox.SelectedItem.ToString();
+
+                // Удаляем выбранное слово
+                if (hashFunction.RemoveWord(selectedHashTable, selectedItem))
+                {
+                    // Добавляем новое слово из textBox1
+                    hashFunction.AddWord(selectedHashTable, textBox1.Text.ToString());
+                    changeButton.BackColor = Color.Green;
+                }
+                else
+                    changeButton.BackColor = Color.Red;
+            }
+            else
+                changeButton.BackColor = Color.Red;
+        }
+
+        // Метод для определения, какой ListBox был выбран
+        private ListBox GetSelectedListBox()
+        {
+            if (listBox1.SelectedItem != null)
+                return listBox1;
+            if (listBox2.SelectedItem != null)
+                return listBox2;
+            if (listBox3.SelectedItem != null)
+                return listBox3;
+
+            return null; // Если ни один элемент не выбран
+        }
+        // Метод для выбора соответствующей хэш-таблицы
+        private Dictionary<string, List<string>> GetSelectedHashTable(ListBox listBox)
+        {
+            if (listBox == listBox1)
+                return hashTableIdentifier;
+            if (listBox == listBox2)
+                return hashTableDigital;
+            if (listBox == listBox3)
+                return hashTableSpecial;
+
+            return null; // Если ListBox не совпадает ни с одним из ожидаемых
+        }
     }
+}
 
 
 
@@ -240,6 +331,6 @@ namespace Translator
     //        tbFSource.SelectionLength = n; // Устанавливаем длину выделения
     //    }
     //}
-}
+//}
     
 
