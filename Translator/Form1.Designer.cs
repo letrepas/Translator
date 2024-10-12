@@ -49,7 +49,7 @@
             // button1
             // 
             this.button1.Location = new System.Drawing.Point(241, 55);
-            this.button1.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.button1.Margin = new System.Windows.Forms.Padding(2);
             this.button1.Name = "button1";
             this.button1.Size = new System.Drawing.Size(68, 22);
             this.button1.TabIndex = 0;
@@ -60,7 +60,7 @@
             // tbFSource
             // 
             this.tbFSource.Location = new System.Drawing.Point(36, 17);
-            this.tbFSource.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.tbFSource.Margin = new System.Windows.Forms.Padding(2);
             this.tbFSource.Multiline = true;
             this.tbFSource.Name = "tbFSource";
             this.tbFSource.Size = new System.Drawing.Size(198, 61);
@@ -69,7 +69,7 @@
             // tbFMessage
             // 
             this.tbFMessage.Location = new System.Drawing.Point(36, 105);
-            this.tbFMessage.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.tbFMessage.Margin = new System.Windows.Forms.Padding(2);
             this.tbFMessage.Multiline = true;
             this.tbFMessage.Name = "tbFMessage";
             this.tbFMessage.Size = new System.Drawing.Size(407, 93);
@@ -107,8 +107,9 @@
             // 
             // writeButton
             // 
+            this.writeButton.Enabled = false;
             this.writeButton.Location = new System.Drawing.Point(318, 55);
-            this.writeButton.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.writeButton.Margin = new System.Windows.Forms.Padding(2);
             this.writeButton.Name = "writeButton";
             this.writeButton.Size = new System.Drawing.Size(68, 22);
             this.writeButton.TabIndex = 8;
@@ -129,7 +130,7 @@
             // findButton
             // 
             this.findButton.Location = new System.Drawing.Point(395, 55);
-            this.findButton.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.findButton.Margin = new System.Windows.Forms.Padding(2);
             this.findButton.Name = "findButton";
             this.findButton.Size = new System.Drawing.Size(68, 22);
             this.findButton.TabIndex = 11;
@@ -140,7 +141,7 @@
             // deleteButton
             // 
             this.deleteButton.Location = new System.Drawing.Point(472, 55);
-            this.deleteButton.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.deleteButton.Margin = new System.Windows.Forms.Padding(2);
             this.deleteButton.Name = "deleteButton";
             this.deleteButton.Size = new System.Drawing.Size(68, 22);
             this.deleteButton.TabIndex = 12;
@@ -151,7 +152,7 @@
             // changeButton
             // 
             this.changeButton.Location = new System.Drawing.Point(550, 55);
-            this.changeButton.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.changeButton.Margin = new System.Windows.Forms.Padding(2);
             this.changeButton.Name = "changeButton";
             this.changeButton.Size = new System.Drawing.Size(68, 22);
             this.changeButton.TabIndex = 13;
@@ -163,7 +164,7 @@
             // 
             this.listBox1.FormattingEnabled = true;
             this.listBox1.Location = new System.Drawing.Point(36, 223);
-            this.listBox1.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.listBox1.Margin = new System.Windows.Forms.Padding(2);
             this.listBox1.Name = "listBox1";
             this.listBox1.Size = new System.Drawing.Size(202, 69);
             this.listBox1.TabIndex = 14;
@@ -172,7 +173,7 @@
             // 
             this.listBox2.FormattingEnabled = true;
             this.listBox2.Location = new System.Drawing.Point(242, 223);
-            this.listBox2.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.listBox2.Margin = new System.Windows.Forms.Padding(2);
             this.listBox2.Name = "listBox2";
             this.listBox2.Size = new System.Drawing.Size(202, 69);
             this.listBox2.TabIndex = 15;
@@ -181,7 +182,7 @@
             // 
             this.listBox3.FormattingEnabled = true;
             this.listBox3.Location = new System.Drawing.Point(448, 223);
-            this.listBox3.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.listBox3.Margin = new System.Windows.Forms.Padding(2);
             this.listBox3.Name = "listBox3";
             this.listBox3.Size = new System.Drawing.Size(202, 69);
             this.listBox3.TabIndex = 16;
@@ -227,7 +228,7 @@
             this.Controls.Add(this.tbFMessage);
             this.Controls.Add(this.tbFSource);
             this.Controls.Add(this.button1);
-            this.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.Margin = new System.Windows.Forms.Padding(2);
             this.Name = "Form1";
             this.Text = "Транслитератор";
             this.ResumeLayout(false);

@@ -11,7 +11,7 @@ namespace Translator
     // Перечисление возможных типов символов
     public enum TCharType { EngLetter, RusLetter, Digit, SETQ, CL, EndRow, EndText, Space, Star, Slash, Exclamation, Equal, Semicolon, AnotherSymbol, OpenBracket, EndBracket, Colon, OpenSquadBracket, EndSquadBracket, Plus, Minus, Comma, Dot, NoInd }; // Тип символа
     // Перечисление типов токенов
-    public enum TToken { lxmIdentifier, lxmSETQ, lxmCL, lxmSpace, lxmOpenBracket, lxmEndBracket, lxmNumber, lxmUnknown, lxmEmpty, lxmLeftParenth, lxmRightParenth, lxmIs, lxmDot, lxmComma, lxmText, lxmtz, lxmdt, lxmr, lxmrs, lxmls };
+    public enum TToken { lxmIdentifier, lxmSETQ, lxmCL, lxmSpace, lxmOpenBracket, lxmEndBracket, lxmNumber, lxmUnknown, lxmEmpty,  lxmLeftParenth, lxmRightParenth, lxmIs, lxmDot, lxmComma, lxmText, lxmtz, lxmdt, lxmr, lxmrs, lxmls };
 
     public class CLex
     {
@@ -113,11 +113,8 @@ namespace Translator
             char[] allowedChars = { 'a', 'b', 'c', 'd' };
             // Начальная инициализация перед началом анализа
             if (enumFState == TState.Start)
-            {
-                intFSourceRowSelection = 0; // Устанавливаем начальную строку
-                intFSourceColSelection = 0; // Устанавливаем начальный столбец
                 GetSymbol(); // Получаем первый символ
-            }
+
 
             // Пропуск комментариев (если встречается '//')
             if (chrFSelection == '/')
@@ -131,6 +128,8 @@ namespace Translator
                     GetSymbol(); // Переходим к следующему символу после конца строки
                 }
             }
+            if (chrFSelection == '\0' && enumFSelectionCharType == TCharType.EndText)
+                enumFState = TState.Finish;
 
             // Variant 13
             switch (enumFSelectionCharType)
@@ -214,7 +213,7 @@ namespace Translator
                     //    G   |  H  |     |
                     //    H   | FFin|     |
 
-                        A:
+                    A:
                         if (chrFSelection == '0')
                         {
                             TakeSymbol();
@@ -288,152 +287,152 @@ namespace Translator
                 // Создание токена служебного слова SETQ
                 case TCharType.SETQ:
                     {
-                        A:
-                            if (chrFSelection == 'S')
-                            {
-                                TakeSymbol();
-                                goto B;
-                            }
-                            else throw new Exception("Ожидался S");
+                    A:
+                        if (chrFSelection == 'S')
+                        {
+                            TakeSymbol();
+                            goto B;
+                        }
+                        else throw new Exception("Ожидался S");
                         B:
-                            if (chrFSelection == 'E')
-                            {
-                                TakeSymbol();
-                                goto C;
-                            }
-                            else throw new Exception("Ожидался E");
+                        if (chrFSelection == 'E')
+                        {
+                            TakeSymbol();
+                            goto C;
+                        }
+                        else throw new Exception("Ожидался E");
                         C:
-                            if (chrFSelection == 'T')
-                            {
-                                TakeSymbol();
-                                goto D;
-                            }
-                            else throw new Exception("Ожидался T");
+                        if (chrFSelection == 'T')
+                        {
+                            TakeSymbol();
+                            goto D;
+                        }
+                        else throw new Exception("Ожидался T");
 
                         D:
-                            if (chrFSelection == 'Q')
-                            {
-                                TakeSymbol();
-                                goto Fin;
-                            }
-                            else throw new Exception("Ожидался Q");
+                        if (chrFSelection == 'Q')
+                        {
+                            TakeSymbol();
+                            goto Fin;
+                        }
+                        else throw new Exception("Ожидался Q");
 
                         Fin:
-                            {
-                                enumFToken = TToken.lxmSETQ;
-                                return;
-                            }
+                        {
+                            enumFToken = TToken.lxmSETQ;
+                            return;
+                        }
                     }
                 // Создание токена служебного слова COMMAND "LINE"
                 case TCharType.CL:
                     {
-                        A:
-                            if (chrFSelection == 'C')
-                            {
-                                TakeSymbol();
-                                goto B;
-                            }
-                            else throw new Exception("Ожидался C");
+                    A:
+                        if (chrFSelection == 'C')
+                        {
+                            TakeSymbol();
+                            goto B;
+                        }
+                        else throw new Exception("Ожидался C");
                         B:
-                            if (chrFSelection == 'O')
-                            {
-                                TakeSymbol();
-                                goto C;
-                            }
-                            else throw new Exception("Ожидался O");
+                        if (chrFSelection == 'O')
+                        {
+                            TakeSymbol();
+                            goto C;
+                        }
+                        else throw new Exception("Ожидался O");
                         C:
-                            if (chrFSelection == 'M')
-                            {
-                                TakeSymbol();
-                                goto D;
-                            }
-                            else throw new Exception("Ожидался M");
+                        if (chrFSelection == 'M')
+                        {
+                            TakeSymbol();
+                            goto D;
+                        }
+                        else throw new Exception("Ожидался M");
 
                         D:
-                            if (chrFSelection == 'M')
-                            {
-                                TakeSymbol();
-                                goto E;
-                            }
-                            else throw new Exception("Ожидался M");
+                        if (chrFSelection == 'M')
+                        {
+                            TakeSymbol();
+                            goto E;
+                        }
+                        else throw new Exception("Ожидался M");
 
                         E:
-                            if (chrFSelection == 'A')
-                            {
-                                TakeSymbol();
-                                goto F;
-                            }
-                            else throw new Exception("Ожидался A");
+                        if (chrFSelection == 'A')
+                        {
+                            TakeSymbol();
+                            goto F;
+                        }
+                        else throw new Exception("Ожидался A");
 
                         F:
-                            if (chrFSelection == 'N')
-                            {
-                                TakeSymbol();
-                                goto G;
-                            }
-                            else throw new Exception("Ожидался N");
+                        if (chrFSelection == 'N')
+                        {
+                            TakeSymbol();
+                            goto G;
+                        }
+                        else throw new Exception("Ожидался N");
 
                         G:
-                            if (chrFSelection == 'D')
-                            {
-                                TakeSymbol();
-                                goto H;
-                            }
-                            else throw new Exception("Ожидался D");
+                        if (chrFSelection == 'D')
+                        {
+                            TakeSymbol();
+                            goto H;
+                        }
+                        else throw new Exception("Ожидался D");
 
                         H:
-                            if (chrFSelection == '"')
-                            {
-                                TakeSymbol();
-                                goto I;
-                            }
-                            else throw new Exception("Ожидался \"");
+                        if (chrFSelection == '"')
+                        {
+                            TakeSymbol();
+                            goto I;
+                        }
+                        else throw new Exception("Ожидался \"");
 
                         I:
-                            if (chrFSelection == 'L')
-                            {
-                                TakeSymbol();
-                                goto J;
-                            }
-                            else throw new Exception("Ожидался L");
+                        if (chrFSelection == 'L')
+                        {
+                            TakeSymbol();
+                            goto J;
+                        }
+                        else throw new Exception("Ожидался L");
 
                         J:
-                            if (chrFSelection == 'I')
-                            {
-                                TakeSymbol();
-                                goto K;
-                            }
-                            else throw new Exception("Ожидался I");
+                        if (chrFSelection == 'I')
+                        {
+                            TakeSymbol();
+                            goto K;
+                        }
+                        else throw new Exception("Ожидался I");
 
                         K:
-                            if (chrFSelection == 'N')
-                            {
-                                TakeSymbol();
-                                goto L;
-                            }
-                            else throw new Exception("Ожидался N");
+                        if (chrFSelection == 'N')
+                        {
+                            TakeSymbol();
+                            goto L;
+                        }
+                        else throw new Exception("Ожидался N");
 
                         L:
-                            if (chrFSelection == 'E')
-                            {
-                                TakeSymbol();
-                                goto M;
-                            }
-                            else throw new Exception("Ожидался E");
+                        if (chrFSelection == 'E')
+                        {
+                            TakeSymbol();
+                            goto M;
+                        }
+                        else throw new Exception("Ожидался E");
 
                         M:
-                            if (chrFSelection == '"')
-                            {
-                                TakeSymbol();
-                                goto Fin;
-                            }
-                            else throw new Exception("Ожидался \"");
+                        if (chrFSelection == '"')
+                        {
+                            TakeSymbol();
+                            goto Fin;
+                        }
+                        else throw new Exception("Ожидался \"");
 
                         Fin:
-                            {
-                                enumFToken = TToken.lxmCL;
-                                return;
-                            }
+                        {
+                            enumFToken = TToken.lxmCL;
+                            return;
+                        }
                     }
 
                 case TCharType.AnotherSymbol:
@@ -459,8 +458,8 @@ namespace Translator
                         GetSymbol();
                         return;
                     }
-                    break ;    
-                    
+                    break;
+
                 case TCharType.OpenBracket:
                     if (chrFSelection == '(')
                     {
@@ -468,7 +467,7 @@ namespace Translator
                         GetSymbol();
                         return;
                     }
-                    break ;
+                    break;
 
                 case TCharType.EndBracket:
                     if (chrFSelection == ')')
@@ -477,8 +476,14 @@ namespace Translator
                         GetSymbol();
                         return;
                     }
-                    break ;                
+                    break;
 
+                case TCharType.EndRow:
+                    {
+                        GetSymbol();
+                        enumFToken = TToken.lxmEmpty;
+                        break;
+                    }
                 case TCharType.EndText:
                     {
                         enumFToken = TToken.lxmEmpty;

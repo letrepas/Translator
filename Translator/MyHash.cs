@@ -45,7 +45,7 @@ namespace laba4
         }
 
         // Метод для поиска слова в хэш-таблице
-        public bool SearchWord(Dictionary<string, List<string>> hashTable, string word)
+        public bool FindhWord(Dictionary<string, List<string>> hashTable, string word)
         {
             string hashValue = HashFunction(word);
             if (hashTable.ContainsKey(hashValue)) // проверяем, содержится ли такой хэш-код

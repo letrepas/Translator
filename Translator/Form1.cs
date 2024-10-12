@@ -22,6 +22,8 @@ namespace Translator
         Dictionary<string, List<string>> hashTableDigital = new Dictionary<string, List<string>>();
         Dictionary<string, List<string>> hashTableSpecial = new Dictionary<string, List<string>>();
         public MyHash hashFunction = new MyHash();
+        private bool isFirstButtonValid = false;
+
         public void TablesToMemo(object sender, System.EventArgs e)
         {
             List<string> listTable = new List<string>();
@@ -50,28 +52,49 @@ namespace Translator
             Synt.Lex.strPSource = tbFSource.Lines;
             Synt.Lex.strPMessage = tbFMessage.Lines;
             Synt.Lex.enumPState = TState.Start;
+
+            Synt.Lex.intPSourceRowSelection = 0;
+            Synt.Lex.intPSourceColSelection = 0;
+            isFirstButtonValid = false;
             try
             {
-                Synt.Lex.NextToken();
-                Synt.S();
-                throw new Exception("Текст верный");
+                for (int i = 0; i < Synt.Lex.strPSource.Length; i++)  // Обрабатываем каждую строку
+                {
+                    
+                    string line = Synt.Lex.strPSource[i];  // Получаем текущую строку
+                    Synt.Lex.NextToken();  // Получаем следующий токен
+                    Synt.S();  // Проверяем синтаксис текущей строки
+
+                    // Переход на следующую строку после завершения анализа одной строки
+                    if (Synt.Lex.enumPState == TState.Continue && i < Synt.Lex.strPSource.Length - 1)
+                        Synt.Lex.enumPState = TState.Start;  // Возвращаем состояние в начало
+                }
+
+                throw new Exception("Текст верный"); // Успешное завершение
+
             }
 
-            catch (Exception exc) // Обработка исключений
+            catch (Exception exc)
             {
-                // Добавление сообщения об ошибке в tbFMessage
                 tbFMessage.Text += exc.Message;
-
-                tbFSource.Select(); // Устанавливаем фокус на tbFSource
-                tbFSource.SelectionStart = 0; // Устанавливаем начальную позицию выделения
+                tbFSource.Select();
+                tbFSource.SelectionStart = 0;
                 int n = 0;
+                for (int i = 0; i < Synt.Lex.intPSourceRowSelection; i++) n += tbFSource.Lines[i].Length + 2;
+                n += Synt.Lex.intPSourceColSelection;
+                tbFSource.SelectionLength = n;
+                // Проверяем, является ли сообщение "Текст верный"
+                if (exc.Message == "Текст верный")
+                {
+                    isFirstButtonValid = true;  // В случае успеха устанавливаем true
+                    writeButton.Enabled = true;  // Разблокируем кнопку
+                }
+                else
+                {
+                    isFirstButtonValid = false;  // В случае ошибки флаг остается false
+                    writeButton.Enabled = false;  // Отключаем кнопку writeButton
+                }
 
-                // Подсчет количества символов для выделения текста до текущей позиции
-                for (int i = 0; i < Synt.Lex.intPSourceRowSelection; i++)
-                    n += tbFSource.Lines[i].Length + 2; // +2 учитывает переход на новую строку
-
-                n += Synt.Lex.intPSourceColSelection; // Добавляем текущую позицию в строке
-                tbFSource.SelectionLength = n; // Устанавливаем длину выделения
             }
         }
 
@@ -85,58 +108,60 @@ namespace Translator
             int x = tbFSource.TextLength;
             int y = tbFSource.Lines.Length;
             tbFMessage.Text = "";
+
+            
             try
             {
                 while (Lex.enumPState != TState.Finish)
                 {
                     Lex.NextToken();
-                    string s1 = "", s = "";
+                    string s1 = "";
                     switch (Lex.enumPToken)
                     {
                         case TToken.lxmIdentifier:
                             {
                                 hashFunction.AddWord(hashTableIdentifier, Lex.strPLexicalUnit);
-                                s1 = "id " + Lex.strPLexicalUnit; int b = 0;
+                                s1 = "id " + Lex.strPLexicalUnit;
                                 TablesToMemo(this, e);
                                 break;
                             }
                         case TToken.lxmNumber:
                             {
                                 hashFunction.AddWord(hashTableDigital, Lex.strPLexicalUnit);
-                                s1 = "num " + Lex.strPLexicalUnit; int b = 0;
+                                s1 = "num " + Lex.strPLexicalUnit;
                                 TablesToMemo(this, e);
                                 break;
                             }
                         case TToken.lxmEndBracket:
                             {
                                 hashFunction.AddWord(hashTableSpecial, ")");
-                                s1 = "spec ) " + Lex.strPLexicalUnit; int b = 0;
+                                s1 = "spec ) " + Lex.strPLexicalUnit;
                                 TablesToMemo(this, e);
                                 break;
                             }
                         case TToken.lxmOpenBracket:
                             {
                                 hashFunction.AddWord(hashTableSpecial, "(");
-                                s1 = "spec ( " + Lex.strPLexicalUnit; int b = 0;
+                                s1 = "spec ( " + Lex.strPLexicalUnit;
                                 TablesToMemo(this, e);
                                 break;
                             }
                         case TToken.lxmCL:
                             {
                                 hashFunction.AddWord(hashTableSpecial, "COMMAND\"LINE\"");
-                                s1 = "spec " + Lex.strPLexicalUnit; int b = 0;
+                                s1 = "spec " + Lex.strPLexicalUnit;
                                 TablesToMemo(this, e);
                                 break;
                             }
                         case TToken.lxmSETQ:
                             {
                                 hashFunction.AddWord(hashTableSpecial, "SETQ");
-                                s1 = "spec " + Lex.strPLexicalUnit; int b = 0;
+                                s1 = "spec " + Lex.strPLexicalUnit;
                                 TablesToMemo(this, e);
                                 break;
                             }
                     }
-                    String m = "(" + s + "" + s1 + ")";
+                    String m = "(" + s1 + ")";
                     tbFMessage.Text += m;
                 }
             }
@@ -186,17 +211,50 @@ namespace Translator
 
         private void findButton_Click(object sender, EventArgs e)
         {
-            ListBox selectedListBox = GetSelectedListBox();
-            Dictionary<string, List<string>> selectedHashTable = GetSelectedHashTable(selectedListBox); // Метод для получения нужной хэш-таблицы
+            string searchTerm = textBox1.Text;
 
-            if (selectedHashTable != null && selectedListBox.SelectedItem != null)
+            if (string.IsNullOrEmpty(searchTerm))
             {
-                string selectedItem = selectedListBox.SelectedItem.ToString();
-                if (hashFunction.SearchWord(selectedHashTable, selectedItem))
-                    findButton.BackColor = Color.Green;
-                else
-                    findButton.BackColor = Color.Red;
+                MessageBox.Show("Введите поисковое значение.");
+                return;
             }
+
+            listBox1.ClearSelected();
+            listBox2.ClearSelected();
+            listBox3.ClearSelected();
+
+            if (FindAndSelectInListBox(listBox1, searchTerm))
+            {
+                findButton.BackColor = Color.Green;
+                return;
+            }
+
+            if (FindAndSelectInListBox(listBox2, searchTerm))
+            {
+                findButton.BackColor = Color.Green;
+                return;
+            }
+
+            if (FindAndSelectInListBox(listBox3, searchTerm))
+            {
+                findButton.BackColor = Color.Green;
+                return;
+            }
+            findButton.BackColor = Color.Red;
+        }
+
+        // Метод для поиска и выделения элемента в ListBox
+        private bool FindAndSelectInListBox(ListBox listBox, string searchTerm)
+        {
+            for (int i = 0; i < listBox.Items.Count; i++)
+            {
+                if (listBox.Items[i].ToString().Equals(searchTerm, StringComparison.OrdinalIgnoreCase))
+                {
+                    listBox.SelectedIndex = i; 
+                    return true; 
+                }
+            }
+            return false; 
         }
 
         private void changeButton_Click(object sender, EventArgs e)

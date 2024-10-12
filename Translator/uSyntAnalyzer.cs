@@ -45,10 +45,9 @@ namespace nsSynt
                     {
                         Lex.NextToken();
                         V();  // после пробела ожидается V (переменная или список)
-                        if (Lex.enumPToken == TToken.lxmEndBracket)  // проверка на закрывающую скобку
-                        {
-                            Lex.NextToken();  // завершаем разбор SETQ
-                        }
+                        if (Lex.enumPToken == TToken.lxmEndBracket) { } // проверка на закрывающую скобку
+                           
+
                         else throw new Exception("Ожидалась закрывающая скобка");
                     }
                     else throw new Exception("Ожидался пробел после SETQ");
@@ -69,9 +68,8 @@ namespace nsSynt
                                 {
                                     Lex.NextToken();
                                     if (Lex.enumPToken == TToken.lxmEndBracket)  // проверка на закрывающую скобку
-                                    {
                                         Lex.NextToken();  // завершаем разбор COMMAND "LINE"
-                                    }
+
                                     else throw new Exception("Ожидалась закрывающая скобка");
                                 }
                                 else throw new Exception("Ожидался второй индефикатор для LINE");
