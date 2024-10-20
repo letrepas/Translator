@@ -1,28 +1,25 @@
 ﻿using nsSynt;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
-using System.Text;
 using System.Windows.Forms;
 using laba4;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement;
-
+using Tree;
 namespace Translator
 {
     public partial class Form1 : Form
     {
-        public Form1()
-        {
-            InitializeComponent();
-            int n = tbFSource.Lines.Length; // Получение количества строк в tbFSource
-        }
         Dictionary<string, List<string>> hashTableIdentifier = new Dictionary<string, List<string>>();
         Dictionary<string, List<string>> hashTableDigital = new Dictionary<string, List<string>>();
         Dictionary<string, List<string>> hashTableSpecial = new Dictionary<string, List<string>>();
         public MyHash hashFunction = new MyHash();
         private bool isFirstButtonValid = false;
+        
+        public Form1()
+        {
+            InitializeComponent();
+            int n = tbFSource.Lines.Length; // Получение количества строк в tbFSource
+        }
 
         public void TablesToMemo(object sender, System.EventArgs e)
         {
@@ -49,6 +46,7 @@ namespace Translator
         {
             tbFMessage.Clear();
             uSyntAnalyzer Synt = new uSyntAnalyzer();
+            TreeV tree = new TreeV(treeView1);
             Synt.Lex.strPSource = tbFSource.Lines;
             Synt.Lex.strPMessage = tbFMessage.Lines;
             Synt.Lex.enumPState = TState.Start;
@@ -60,7 +58,7 @@ namespace Translator
             {
                 for (int i = 0; i < Synt.Lex.strPSource.Length; i++)  // Обрабатываем каждую строку
                 {
-                    
+
                     string line = Synt.Lex.strPSource[i];  // Получаем текущую строку
                     Synt.Lex.NextToken();  // Получаем следующий токен
                     Synt.S();  // Проверяем синтаксис текущей строки
@@ -109,7 +107,7 @@ namespace Translator
             int y = tbFSource.Lines.Length;
             tbFMessage.Text = "";
 
-            
+
             try
             {
                 while (Lex.enumPState != TState.Finish)
@@ -250,11 +248,11 @@ namespace Translator
             {
                 if (listBox.Items[i].ToString().Equals(searchTerm, StringComparison.OrdinalIgnoreCase))
                 {
-                    listBox.SelectedIndex = i; 
-                    return true; 
+                    listBox.SelectedIndex = i;
+                    return true;
                 }
             }
-            return false; 
+            return false;
         }
 
         private void changeButton_Click(object sender, EventArgs e)
@@ -304,6 +302,41 @@ namespace Translator
 
             return null; // Если ListBox не совпадает ни с одним из ожидаемых
         }
+
+        private void button2_Click(object sender, EventArgs e)
+        {
+            treeView1.Nodes.Clear();
+            TreeV parserTree = new TreeV(treeView1);
+            parserTree.Lex.strPSource = tbFSource.Lines;
+            parserTree.Lex.strPMessage = tbFMessage.Lines;
+            parserTree.Lex.enumPState = TState.Start;
+
+            parserTree.Lex.intPSourceRowSelection = 0;
+            parserTree.Lex.intPSourceColSelection = 0;
+
+            try
+            {
+
+                for (int i = 0; i < parserTree.Lex.strPSource.Length; i++)  // Обрабатываем каждую строку
+                {
+
+                    string line = parserTree.Lex.strPSource[i];  // Получаем текущую строку
+                    parserTree.Lex.NextToken();  // Получаем следующий токен
+                    parserTree.S();  // Проверяем синтаксис текущей строки
+
+                    // Переход на следующую строку после завершения анализа одной строки
+                    if (parserTree.Lex.enumPState == TState.Continue && i < parserTree.Lex.strPSource.Length - 1)
+                        parserTree.Lex.enumPState = TState.Start;  // Возвращаем состояние в начало
+                }
+
+                treeView1.ExpandAll();
+            }
+            catch (Exception ex)
+            {
+                // Выводим сообщение об ошибке
+                MessageBox.Show("Ошибка разбора: " + ex.Message);
+            }
+        }
     }
 }
 
@@ -314,7 +347,7 @@ namespace Translator
     //{
     //    // Создание экземпляра класса CLex для анализа текста
     //    CLex Lex = new CLex();
-    //    Lex.strPSource = tbFSource.Lines; // Устанавливаем источник текста из текстового поля tbFSource
+    //    Lex.strPSource = tbFSource.Lines; // Устанавливаем источник текста из текстового поля tbFSourceи
     //    Lex.strPMessage = tbFMessage.Lines; // Устанавливаем сообщения из текстового поля tbFMessage
 
     //    int x = tbFSource.TextLength; // Получаем количество символов в tbFSource

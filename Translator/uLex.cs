@@ -105,6 +105,11 @@ namespace Translator
             strFLexicalUnit += s; // Добавляем символ к текущей лексической единице
             GetSymbol(); // Получаем следующий символ
         }
+        // Метод для возврата текущей лексемы
+        public string CurrentTokenValue()
+        {
+            return strFLexicalUnit; // Возвращаем значение текущего токена (лексемы)
+        }
 
         // Метод перехода к следующему токену
         public void NextToken()

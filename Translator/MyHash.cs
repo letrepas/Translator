@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace laba4
 {
@@ -30,26 +28,25 @@ namespace laba4
         {
             string hashValue = HashFunction(word); // вычисляется хэш-код для слова
 
+            string uniqueKey = hashValue + "_" + word;
             // Проверяем, содержится ли уже такой хэш-код в хэш-таблице
-            if (!hashTable.ContainsKey(hashValue))
-                hashTable[hashValue] = new List<string>(); // в таблице создается новая пустая коллекция
+            if (!hashTable.ContainsKey(uniqueKey))
+                hashTable[uniqueKey] = new List<string>(); // в таблице создается новая пустая коллекция
             else
             {
-                if (hashTable[hashValue].Contains(word)) // проверяем, содержится ли уже переданное слово
-                {
-                    Console.WriteLine("Слово уже существует: " + word); // сообщение о существующем слове
+                if (hashTable[uniqueKey].Contains(word)) // проверяем, содержится ли уже переданное слово
                     return;
-                }
             }
-            hashTable[hashValue].Add(word); // добавляем слово в коллекцию
+            hashTable[uniqueKey].Add(word); // добавляем слово в коллекцию
         }
 
         // Метод для поиска слова в хэш-таблице
         public bool FindhWord(Dictionary<string, List<string>> hashTable, string word)
         {
             string hashValue = HashFunction(word);
-            if (hashTable.ContainsKey(hashValue)) // проверяем, содержится ли такой хэш-код
-                return hashTable[hashValue].Contains(word); // проверяем, содержится ли слово в коллекции
+            string uniqueKey = hashValue + "_" + word;
+            if (hashTable.ContainsKey(uniqueKey)) // проверяем, содержится ли такой хэш-код
+                return hashTable[uniqueKey].Contains(word); // проверяем, содержится ли слово в коллекции
             return false; // хэш-код не найден
         }
 
@@ -57,14 +54,15 @@ namespace laba4
         public bool RemoveWord(Dictionary<string, List<string>> hashTable, string word)
         {
             string hashValue = HashFunction(word);
-            if (hashTable.ContainsKey(hashValue)) // проверяем наличие в хэш-таблице
+            string uniqueKey = hashValue + "_" + word;
+            if (hashTable.ContainsKey(uniqueKey)) // проверяем наличие в хэш-таблице
             {
-                List<string> words = hashTable[hashValue];
+                List<string> words = hashTable[uniqueKey];
                 if (words.Contains(word))
                 {
                     words.Remove(word); // если слово найдено, оно удаляется
                     if (words.Count == 0) // если коллекция становится пустой
-                        hashTable.Remove(hashValue); // удаляем ее из хэш-таблицы
+                        hashTable.Remove(uniqueKey); // удаляем ее из хэш-таблицы
                     return true;
                 }
             }

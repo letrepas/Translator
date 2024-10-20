@@ -44,6 +44,8 @@
             this.listBox3 = new System.Windows.Forms.ListBox();
             this.reloadButton = new System.Windows.Forms.Button();
             this.textBox1 = new System.Windows.Forms.TextBox();
+            this.treeView1 = new System.Windows.Forms.TreeView();
+            this.button2 = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // button1
@@ -207,11 +209,31 @@
             this.textBox1.Size = new System.Drawing.Size(200, 67);
             this.textBox1.TabIndex = 18;
             // 
+            // treeView1
+            // 
+            this.treeView1.Location = new System.Drawing.Point(663, 17);
+            this.treeView1.Name = "treeView1";
+            this.treeView1.Size = new System.Drawing.Size(193, 275);
+            this.treeView1.TabIndex = 19;
+            // 
+            // button2
+            // 
+            this.button2.Location = new System.Drawing.Point(550, 15);
+            this.button2.Margin = new System.Windows.Forms.Padding(2);
+            this.button2.Name = "button2";
+            this.button2.Size = new System.Drawing.Size(68, 22);
+            this.button2.TabIndex = 20;
+            this.button2.Text = "build tree";
+            this.button2.UseVisualStyleBackColor = true;
+            this.button2.Click += new System.EventHandler(this.button2_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(688, 327);
+            this.ClientSize = new System.Drawing.Size(882, 313);
+            this.Controls.Add(this.button2);
+            this.Controls.Add(this.treeView1);
             this.Controls.Add(this.textBox1);
             this.Controls.Add(this.reloadButton);
             this.Controls.Add(this.listBox3);
@@ -254,6 +276,8 @@
         private System.Windows.Forms.ListBox listBox3;
         private System.Windows.Forms.Button reloadButton;
         private System.Windows.Forms.TextBox textBox1;
+        private System.Windows.Forms.TreeView treeView1;
+        private System.Windows.Forms.Button button2;
     }
 }
 
