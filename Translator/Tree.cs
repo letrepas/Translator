@@ -9,7 +9,7 @@ namespace Tree
     {
         public CLex Lex = new CLex();
         public TreeView tree;
-        private HashSet<string> initializedVariables = new HashSet<string>();
+        public Dictionary<string, int> initializedVariables = new Dictionary<string, int>();
 
         public TreeV(TreeView treeView)
         {
@@ -80,7 +80,7 @@ namespace Tree
                         if (Lex.enumPToken == TToken.lxmIdentifier)
                         {
                             string var1 = Lex.CurrentTokenValue();
-                            if (!initializedVariables.Contains(var1))
+                            if (!initializedVariables.ContainsKey(var1))
                                 throw new Exception($"Переменная {var1} не инициализирована!");
 
                             TreeNode idNode1 = new TreeNode(Lex.strPLexicalUnit);
@@ -93,7 +93,9 @@ namespace Tree
                                 {
 
                                     string var2 = Lex.CurrentTokenValue();
-                                    if (!initializedVariables.Contains(var2))
+                                    if (var1 == var2)
+                                        throw new Exception("Идентификаторы var1 и var2 не должны быть одинаковыми!");
+                                    if (!initializedVariables.ContainsKey(var2))
                                         throw new Exception($"Переменная {var2} не инициализирована!");
 
                                     TreeNode idNode2 = new TreeNode(Lex.strPLexicalUnit);
@@ -148,6 +150,8 @@ namespace Tree
             if (Lex.enumPToken == TToken.lxmIdentifier)  // ожидаем индефикатор
             {
                 string identifier = Lex.CurrentTokenValue();
+                if (initializedVariables.ContainsKey(identifier))
+                    throw new Exception($"Идентификатор {identifier} уже инициализирован!");
                 TreeNode idNode = new TreeNode(Lex.strPLexicalUnit);
                 cNode.Nodes.Add(idNode);
                 Lex.NextToken();
@@ -156,7 +160,8 @@ namespace Tree
                     Lex.NextToken();
                     if (Lex.enumPToken == TToken.lxmNumber)  // ожидаем число
                     {
-                        initializedVariables.Add(identifier);  // Инициализируем переменную
+                        int value = Int32.Parse(Lex.CurrentTokenValue());
+                        initializedVariables[identifier] = value;
                         TreeNode numberNode = new TreeNode(Lex.strPLexicalUnit);
                         cNode.Nodes.Add(numberNode);
                         Lex.NextToken();

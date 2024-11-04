@@ -5,6 +5,7 @@ using System.Drawing;
 using System.Windows.Forms;
 using laba4;
 using Tree;
+using System.Reflection;
 namespace Translator
 {
     public partial class Form1 : Form
@@ -13,12 +14,16 @@ namespace Translator
         Dictionary<string, List<string>> hashTableDigital = new Dictionary<string, List<string>>();
         Dictionary<string, List<string>> hashTableSpecial = new Dictionary<string, List<string>>();
         public MyHash hashFunction = new MyHash();
-        private bool isFirstButtonValid = false;
-        
+        bool isFirstButtonValid = false;
+        private Panel drawingPanel;
+        uSyntAnalyzer Synt = new uSyntAnalyzer();
+
         public Form1()
         {
             InitializeComponent();
+            InitializeDrawingPanel();
             int n = tbFSource.Lines.Length; // Получение количества строк в tbFSource
+            // Перерисовка формы с полученными значениями X
         }
 
         public void TablesToMemo(object sender, System.EventArgs e)
@@ -45,11 +50,11 @@ namespace Translator
         private void btnFStart_Click(object sender, EventArgs e)
         {
             tbFMessage.Clear();
-            uSyntAnalyzer Synt = new uSyntAnalyzer();
             TreeV tree = new TreeV(treeView1);
             Synt.Lex.strPSource = tbFSource.Lines;
             Synt.Lex.strPMessage = tbFMessage.Lines;
             Synt.Lex.enumPState = TState.Start;
+            Synt.initializedVariables.Clear();
 
             Synt.Lex.intPSourceRowSelection = 0;
             Synt.Lex.intPSourceColSelection = 0;
@@ -67,7 +72,6 @@ namespace Translator
                     if (Synt.Lex.enumPState == TState.Continue && i < Synt.Lex.strPSource.Length - 1)
                         Synt.Lex.enumPState = TState.Start;  // Возвращаем состояние в начало
                 }
-
                 throw new Exception("Текст верный"); // Успешное завершение
 
             }
@@ -86,11 +90,13 @@ namespace Translator
                 {
                     isFirstButtonValid = true;  // В случае успеха устанавливаем true
                     writeButton.Enabled = true;  // Разблокируем кнопку
+                    drawingPanel.Invalidate();
                 }
                 else
                 {
                     isFirstButtonValid = false;  // В случае ошибки флаг остается false
                     writeButton.Enabled = false;  // Отключаем кнопку writeButton
+                    drawingPanel.Invalidate();
                 }
 
             }
@@ -336,6 +342,40 @@ namespace Translator
                 // Выводим сообщение об ошибке
                 MessageBox.Show("Ошибка разбора: " + ex.Message);
             }
+        }
+
+        private void InitializeDrawingPanel()
+        {
+            drawingPanel = new Panel
+            {
+                Location = new Point(36, 300),
+                Size = new Size(202, 130),
+                BorderStyle = BorderStyle.FixedSingle,
+                BackColor = Color.White
+            };
+            Controls.Add(drawingPanel);
+            drawingPanel.Paint += new PaintEventHandler(DrawLine);
+        }
+
+        private void DrawLinesFromPoints(Graphics g)
+        {
+            List<int> xValues = Synt.Points;
+            int fixedY = 75;
+            if (xValues.Count > 1)
+            {
+                for (int i = 0; i < xValues.Count - 1; i++)
+                    g.DrawLine(Pens.Black, xValues[i], fixedY, xValues[i + 1], fixedY);
+            }
+        }
+
+        private void DrawLine(object sender, PaintEventArgs e)
+        {
+            if (isFirstButtonValid)
+            {
+                Graphics g = e.Graphics;
+                DrawLinesFromPoints(g);
+            }
+            else e.Graphics.Clear(drawingPanel.BackColor); 
         }
     }
 }

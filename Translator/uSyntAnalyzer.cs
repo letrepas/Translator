@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using Translator;
 
 namespace nsSynt
@@ -7,8 +8,14 @@ namespace nsSynt
     class uSyntAnalyzer
     {
         public CLex Lex = new CLex();
-        private HashSet<string> initializedVariables = new HashSet<string>();  // Набор для отслеживания инициализированных переменных
+        public Dictionary<string, int> initializedVariables = new Dictionary<string, int>();
 
+        List<int> points = new List<int>();
+        public List<int> Points
+        {
+            get { return points; }  // Возвращаем текущий список точек
+            set { points = value; }  // Устанавливаем новый список точек
+        }
         public void S()
         {
             O();  // разбор правила O
@@ -58,9 +65,10 @@ namespace nsSynt
                         if (Lex.enumPToken == TToken.lxmIdentifier)  // ожидаем первый индефикатор
                         {
                             string var1 = Lex.CurrentTokenValue();
-                            if (!initializedVariables.Contains(var1))
+                            if (!initializedVariables.ContainsKey(var1))
                                 throw new Exception($"Переменная {var1} не инициализирована!");
-
+                            int value1 = initializedVariables[var1];
+                            Points.Add(value1);
                             Lex.NextToken();
                             if (Lex.enumPToken == TToken.lxmSpace)  // проверка на пробел
                             {
@@ -68,9 +76,12 @@ namespace nsSynt
                                 if (Lex.enumPToken == TToken.lxmIdentifier)  // ожидаем второй индефикатор
                                 {
                                     string var2 = Lex.CurrentTokenValue();
-                                    if (!initializedVariables.Contains(var2))
+                                    if (var1 == var2)
+                                        throw new Exception("Идентификаторы var1 и var2 не должны быть одинаковыми!");
+                                    if (!initializedVariables.ContainsKey(var2))
                                         throw new Exception($"Переменная {var2} не инициализирована!");
-
+                                    int value2 = initializedVariables[var2];
+                                    Points.Add(value2);
                                     Lex.NextToken();
                                     if (Lex.enumPToken == TToken.lxmEndBracket)  // проверка на закрывающую скобку
                                         Lex.NextToken();  // завершаем разбор COMMAND "LINE"
@@ -112,13 +123,19 @@ namespace nsSynt
             if (Lex.enumPToken == TToken.lxmIdentifier)  // ожидаем индефикатор
             {
                 string identifier = Lex.CurrentTokenValue();
+                // Проверяем, был ли идентификатор уже инициализирован
+                if (initializedVariables.ContainsKey(identifier))
+                    throw new Exception($"Идентификатор {identifier} уже инициализирован!");
                 Lex.NextToken();
                 if (Lex.enumPToken == TToken.lxmSpace)
                 {
                     Lex.NextToken();
                     if (Lex.enumPToken == TToken.lxmNumber)  // ожидаем число 
                     {
-                        initializedVariables.Add(identifier);  // Инициализируем переменную
+                        // Преобразуем значение токена в число
+                        int value = ConvertBinaryToDecimal(Lex.CurrentTokenValue());
+
+                        initializedVariables[identifier] = value;
                         Lex.NextToken();
                     }
                     else throw new Exception("Ожидался числовое значение");
@@ -126,6 +143,10 @@ namespace nsSynt
                 else throw new Exception("Ожидался пробел");
             }
             else throw new Exception("Ожидалось индефикатор");
+        }
+        public int ConvertBinaryToDecimal(string binaryCode)
+        {
+            return Convert.ToInt32(binaryCode, 2);
         }
     }
 }
