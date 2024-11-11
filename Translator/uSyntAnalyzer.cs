@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Linq;
 using Translator;
 
 namespace nsSynt
@@ -132,9 +133,36 @@ namespace nsSynt
                     Lex.NextToken();
                     if (Lex.enumPToken == TToken.lxmNumber)  // ожидаем число 
                     {
-                        // Преобразуем значение токена в число
-                        int value = ConvertBinaryToDecimal(Lex.CurrentTokenValue());
+                        string binaryValue = Lex.CurrentTokenValue();
 
+                        // Семантическая проверка для переменных из одной буквы (a, b, c, d)
+                        if (identifier.Length == 1)
+                        {
+                            switch (identifier)
+                            {
+                                case "a":
+                                    if (!binaryValue.StartsWith("00"))
+                                        throw new Exception("Значение переменной 'a' должно начинаться с '00'.");
+                                    break;
+                                case "b":
+                                    int onesCount = binaryValue.Count(c => c == '1');
+                                    if (onesCount % 2 != 0)
+                                        throw new Exception("Значение переменной 'b' должно содержать четное количество единиц.");
+                                    break;
+                                case "c":
+                                    if (binaryValue.Length < 9)
+                                        throw new Exception("Значение переменной 'c' должно быть не менее 9 символов.");
+                                    break;
+                                case "d":
+                                    throw new Exception("Переменной 'd' запрещено присваивать значение.");
+                                default:
+                                    // Если буква неизвестная, считаем значение корректным
+                                    break;
+                            }
+                        }
+
+                        // Преобразуем значение токена в десятичное число и инициализируем переменную
+                        int value = ConvertBinaryToDecimal(binaryValue);
                         initializedVariables[identifier] = value;
                         Lex.NextToken();
                     }
