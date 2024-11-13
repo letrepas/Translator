@@ -11,6 +11,9 @@ namespace Tree
         public CLex Lex = new CLex();
         public TreeView tree;
         public Dictionary<string, int> initializedVariables = new Dictionary<string, int>();
+        private string lastVariable;
+        private int flagCount = 0;
+        private string lastValue;
 
         public TreeV(TreeView treeView)
         {
@@ -163,6 +166,32 @@ namespace Tree
                     {
                         string binaryValue = Lex.CurrentTokenValue();
 
+                        if (flagCount == 1)
+                        {
+                            if (lastVariable == "a" && lastValue.ToString().StartsWith("001001"))
+                            {
+                                if (!(new List<string> { "ac", "ad", "acc" }).Contains(identifier))
+                                    throw new Exception($"После переменной 'a' со значением, начинающимся с '001001', может быть только одна из переменных: ac, ad, acc");
+                            }
+                            else if (lastVariable == "a" && lastValue.StartsWith("00"))
+                            {
+                                if (!(new List<string> { "abc", "ab", "abcd", "aacd" }).Contains(identifier))
+                                    throw new Exception($"После переменной 'a' может быть только одна из переменных: abc, ab, abcd, aacd");
+                            }
+                            else if ((new List<string> { "abc", "ab", "abcd", "aacd" }).Contains(lastVariable) && ToString().StartsWith("00"))
+                            {
+                                if (identifier != "a")
+                                    throw new Exception("После переменных abc, ab, abcd, aacd может следовать только переменная 'a'.");
+                            }
+                            else if ((new List<string> {"ac", "ad", "acc" }).Contains(lastVariable) && lastValue.StartsWith("001001"))
+                            {
+                                if (identifier != "a")
+                                    throw new Exception("После переменных ac, ad, acc, aacd может следовать только переменная 'a'.");
+                            }
+                        }
+                        flagCount++;
+                        lastVariable = identifier;
+                        lastValue = binaryValue;
                         // Семантическая проверка для переменных из одной буквы (a, b, c, d)
                         if (identifier.Length == 1)
                         {
