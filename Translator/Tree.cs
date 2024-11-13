@@ -11,9 +11,10 @@ namespace Tree
         public CLex Lex = new CLex();
         public TreeView tree;
         public Dictionary<string, int> initializedVariables = new Dictionary<string, int>();
-        private string lastVariable;
-        private int flagCount = 0;
-        private string lastValue;
+        string lastVariable;
+        int flagCount = 0;
+        string lastValue;
+        bool isValidSequence = true;
 
         public TreeV(TreeView treeView)
         {
@@ -99,11 +100,18 @@ namespace Tree
                                     string var2 = Lex.CurrentTokenValue();
                                     if (var1 == var2)
                                         throw new Exception("Идентификаторы var1 и var2 не должны быть одинаковыми!");
-                                    if (!initializedVariables.ContainsKey(var2))
+                                    if (!initializedVariables.ContainsKey(var2) && isValidSequence == true)
                                         throw new Exception($"Переменная {var2} не инициализирована!");
-
-                                    TreeNode idNode2 = new TreeNode(Lex.strPLexicalUnit);
-                                    oNode.Nodes.Add(idNode2);
+                                    if (isValidSequence)
+                                    {
+                                        TreeNode idNode2 = new TreeNode(Lex.strPLexicalUnit);
+                                        oNode.Nodes.Add(idNode2);
+                                    }
+                                    else
+                                    {
+                                        TreeNode errorNode = new TreeNode("Ошибка: Идентификатор не соответствует правилу");
+                                        oNode.Nodes.Add(errorNode);
+                                    }
                                     Lex.NextToken();
                                     if (Lex.enumPToken == TToken.lxmEndBracket)
                                     {
@@ -165,33 +173,6 @@ namespace Tree
                     if (Lex.enumPToken == TToken.lxmNumber)  // ожидаем число
                     {
                         string binaryValue = Lex.CurrentTokenValue();
-
-                        if (flagCount == 1)
-                        {
-                            if (lastVariable == "a" && lastValue.ToString().StartsWith("001001"))
-                            {
-                                if (!(new List<string> { "ac", "ad", "acc" }).Contains(identifier))
-                                    throw new Exception($"После переменной 'a' со значением, начинающимся с '001001', может быть только одна из переменных: ac, ad, acc");
-                            }
-                            else if (lastVariable == "a" && lastValue.StartsWith("00"))
-                            {
-                                if (!(new List<string> { "abc", "ab", "abcd", "aacd" }).Contains(identifier))
-                                    throw new Exception($"После переменной 'a' может быть только одна из переменных: abc, ab, abcd, aacd");
-                            }
-                            else if ((new List<string> { "abc", "ab", "abcd", "aacd" }).Contains(lastVariable) && ToString().StartsWith("00"))
-                            {
-                                if (identifier != "a")
-                                    throw new Exception("После переменных abc, ab, abcd, aacd может следовать только переменная 'a'.");
-                            }
-                            else if ((new List<string> {"ac", "ad", "acc" }).Contains(lastVariable) && lastValue.StartsWith("001001"))
-                            {
-                                if (identifier != "a")
-                                    throw new Exception("После переменных ac, ad, acc, aacd может следовать только переменная 'a'.");
-                            }
-                        }
-                        flagCount++;
-                        lastVariable = identifier;
-                        lastValue = binaryValue;
                         // Семантическая проверка для переменных из одной буквы (a, b, c, d)
                         if (identifier.Length == 1)
                         {
@@ -213,16 +194,47 @@ namespace Tree
                                 case "d":
                                     throw new Exception("Переменной 'd' запрещено присваивать значение.");
                                 default:
-                                    // Если буква неизвестная, считаем значение корректным
                                     break;
                             }
                         }
-                        
-                        int value = Int32.Parse(Lex.CurrentTokenValue());
-                        initializedVariables[identifier] = value;
-                        TreeNode numberNode = new TreeNode(Lex.strPLexicalUnit);
-                        cNode.Nodes.Add(numberNode);
-                        Lex.NextToken();
+
+                        if (flagCount == 1)
+                        {
+                            if (lastVariable == "a" && lastValue.ToString().StartsWith("001001"))
+                            {
+                                if (!(new List<string> { "ac", "ad", "acc" }).Contains(identifier))
+                                    isValidSequence = false;
+                            }
+                            else if (lastVariable == "a" && lastValue.StartsWith("00"))
+                            {
+                                if (!(new List<string> { "abc", "ab", "abcd", "aacd" }).Contains(identifier))
+                                    isValidSequence = false;
+                            }
+                            else if ((new List<string> { "abc", "ab", "abcd", "aacd" }).Contains(lastVariable) && ToString().StartsWith("00"))
+                            {
+                                if (identifier != "a")
+                                    isValidSequence = false;
+                            }
+                            else if ((new List<string> {"ac", "ad", "acc" }).Contains(lastVariable) && lastValue.StartsWith("001001"))
+                            {
+                                if (identifier != "a")
+                                    isValidSequence = false;
+                            }
+                        }
+                        if (isValidSequence)
+                        {
+                            flagCount++;
+                            lastVariable = identifier;
+                            lastValue = binaryValue;
+
+                            int value = Int32.Parse(Lex.CurrentTokenValue());
+                            initializedVariables[identifier] = value;
+                            TreeNode numberNode = new TreeNode(Lex.strPLexicalUnit);
+                            cNode.Nodes.Add(numberNode);
+                            Lex.NextToken();
+                        }
+                        else
+                            Lex.NextToken();
                     }
                     else throw new Exception("Ожидалось числовое значение");
                 }
@@ -232,3 +244,5 @@ namespace Tree
         }
     }
 }
+/*(SETQ a 001101 abc 101)
+(COMMAND"LINE" a abc) */
