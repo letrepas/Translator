@@ -311,6 +311,7 @@ namespace Translator
         private void button2_Click(object sender, EventArgs e)
         {
             treeView1.Nodes.Clear();
+            treeView2.Nodes.Clear();
             TreeV parserTree = new TreeV(treeView1);
             parserTree.Lex.strPSource = tbFSource.Lines;
             parserTree.Lex.strPMessage = tbFMessage.Lines;
@@ -335,7 +336,7 @@ namespace Translator
                 }
 
                 treeView1.ExpandAll();
-                CreateSampleTree(treeView2);
+                parserTree.CreateSampleTree(treeView2);
             }
             catch (Exception ex)
             {
@@ -376,43 +377,6 @@ namespace Translator
                 DrawLinesFromPoints(g);
             }
             else e.Graphics.Clear(drawingPanel.BackColor); 
-        }
-        private void CreateSampleTree(TreeView treeView2)
-        {
-            treeView2.Nodes.Clear();
-
-            // Первый вариант: a -> 001001... -> ac | ad | acc
-            TreeNode root1 = new TreeNode("a");
-            TreeNode node1 = new TreeNode("001001...");
-            node1.Nodes.Add("ac");
-            node1.Nodes.Add("ad");
-            node1.Nodes.Add("acc");
-            root1.Nodes.Add(node1);
-
-            // Второй вариант: a -> 00... -> abc | ab | abcd | aacd
-            TreeNode node2 = new TreeNode("00...");
-            node2.Nodes.Add("abc");
-            node2.Nodes.Add("ab");
-            node2.Nodes.Add("abcd");
-            node2.Nodes.Add("aacd");
-            root1.Nodes.Add(node2);
-            treeView2.Nodes.Add(root1);
-
-            // Третий вариант: abc | ab | abcd | aacd -> 00... -> a
-            TreeNode root2 = new TreeNode("abc | ab | abcd | aacd");
-            TreeNode node3 = new TreeNode("00...");
-            node3.Nodes.Add("a");
-            root2.Nodes.Add(node3);
-            treeView2.Nodes.Add(root2);
-
-            // Четвертый вариант: ac | ad | acc -> 001001... -> a
-            TreeNode root3 = new TreeNode("ac | ad | acc");
-            TreeNode node4 = new TreeNode("001001...");
-            node4.Nodes.Add("a");
-            root3.Nodes.Add(node4);
-            treeView2.Nodes.Add(root3);
-
-            treeView2.ExpandAll();
         }
     }
 }
