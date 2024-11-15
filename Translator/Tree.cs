@@ -4,10 +4,12 @@ using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;  // Для работы с TreeView
 using Translator;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement;
+using TreeView = System.Windows.Forms.TreeView;
 
 namespace Tree
 {
-    class TreeV
+    public class TreeV
     {
         public CLex Lex = new CLex();
         public TreeView tree;
@@ -16,7 +18,7 @@ namespace Tree
         int flagCount = 0;
         string lastValue;
         bool isValidSequence = true;
-
+        public string identifier;
         public TreeV(TreeView treeView)
         {
             tree = treeView;
@@ -162,7 +164,7 @@ namespace Tree
             parentNode.Nodes.Add(cNode);
             if (Lex.enumPToken == TToken.lxmIdentifier)  // ожидаем индефикатор
             {
-                string identifier = Lex.CurrentTokenValue();
+                identifier = Lex.CurrentTokenValue();
                 if (initializedVariables.ContainsKey(identifier))
                     throw new Exception($"Идентификатор {identifier} уже инициализирован!");
                 TreeNode idNode = new TreeNode(Lex.strPLexicalUnit);
@@ -243,97 +245,7 @@ namespace Tree
             }
             else throw new Exception("Ожидался индефикатор");
         }
-
-        public void CreateSampleTree(TreeView treeView2)
-        {
-            
-            //treeView2.DrawMode = TreeViewDrawMode.OwnerDrawText;
-            //treeView2.DrawNode += new DrawTreeNodeEventHandler(TreeView_DrawNode);
-
-            // Первый вариант: a -> 001001... -> ac | ad | acc
-            TreeNode root1 = new TreeNode("a");
-            TreeNode node1 = new TreeNode("001001...");
-            node1.Nodes.Add("ac");
-            node1.Nodes.Add("ad");
-            node1.Nodes.Add("acc");
-            root1.Nodes.Add(node1);
-
-            // Второй вариант: a -> 00... -> abc | ab | abcd | aacd
-            TreeNode node2 = new TreeNode("00...");
-            node2.Nodes.Add("abc");
-            node2.Nodes.Add("ab");
-            node2.Nodes.Add("abcd");
-            node2.Nodes.Add("aacd");
-            root1.Nodes.Add(node2);
-            treeView2.Nodes.Add(root1);
-
-            // Третий вариант: abc -> 00... -> a
-            TreeNode root3 = new TreeNode("abc");
-            TreeNode node3 = new TreeNode("00...");
-            node3.Nodes.Add("a");
-            root3.Nodes.Add(node3);
-            treeView2.Nodes.Add(root3);
-
-            // Четвертый вариант: ab -> 00... -> a
-            TreeNode root4 = new TreeNode("ab");
-            TreeNode node4 = new TreeNode("00...");
-            node4.Nodes.Add("a");
-            root4.Nodes.Add(node4);
-            treeView2.Nodes.Add(root4);
-
-            // Пятый вариант: abcd -> 00... -> a
-            TreeNode root5 = new TreeNode("abcd");
-            TreeNode node5 = new TreeNode("00...");
-            node5.Nodes.Add("a");
-            root5.Nodes.Add(node5);
-            treeView2.Nodes.Add(root5);
-
-            // Шестой вариант: aacd -> 00... -> a
-            TreeNode root6 = new TreeNode("aacd");
-            TreeNode node6 = new TreeNode("00...");
-            node6.Nodes.Add("a");
-            root6.Nodes.Add(node6);
-            treeView2.Nodes.Add(root6);
-
-            // Седьмой вариант: ac -> 001001... -> a
-            TreeNode root7 = new TreeNode("ac");
-            TreeNode node7 = new TreeNode("001001...");
-            node7.Nodes.Add("a");
-            root7.Nodes.Add(node7);
-            treeView2.Nodes.Add(root7);
-
-            // Восьмой вариант: ad -> 001001... -> a
-            TreeNode root8 = new TreeNode("ad");
-            TreeNode node8 = new TreeNode("001001...");
-            node8.BackColor = Color.Blue;
-            node8.Nodes.Add("a");
-            root8.Nodes.Add(node8);
-            treeView2.Nodes.Add(root8);
-
-            // Девятый вариант: acc -> 001001... -> a
-            TreeNode root9 = new TreeNode("acc");
-            TreeNode node9 = new TreeNode("001001...");
-            node9.Nodes.Add("a");
-            root9.Nodes.Add(node9);
-            treeView2.Nodes.Add(root9);
-
-            treeView2.ExpandAll();
-        }
-
-        // Событие для рисования узлов
-        public void TreeView_DrawNode(object sender, DrawTreeNodeEventArgs e)
-        {
-            // Применение условного закрашивания
-            if (lastValue == "000")
-            {
-                // Закрашиваем узел с текстом "001001..." в синий
-                e.Graphics.FillRectangle(Brushes.LightBlue, e.Bounds);
-            }
-
-            // Рисуем текст узла с учетом его расположения
-            e.Graphics.DrawString(e.Node.Text, e.Node.TreeView.Font, Brushes.Black, e.Bounds.X + 2, e.Bounds.Y + 2);
-        }
-    }
-    }
+    }  
+}
 /*(SETQ a 001101 abc 101)
 (COMMAND"LINE" a abc) */
