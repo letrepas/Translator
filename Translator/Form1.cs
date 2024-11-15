@@ -16,7 +16,7 @@ namespace Translator
         public MyHash hashFunction = new MyHash();
         bool isFirstButtonValid = false;
         private Panel drawingPanel;
-        uSyntAnalyzer Synt = new uSyntAnalyzer();
+        uSyntAnalyzer Synt;
         private DrawTreeNodeEventHandler customDrawNodeHandler;
         public TreeV parserTree;
         int notUsed = 0;
@@ -53,6 +53,7 @@ namespace Translator
         private void btnFStart_Click(object sender, EventArgs e)
         {
             tbFMessage.Clear();
+            Synt = new uSyntAnalyzer(); // убрал с поля
             Synt.Lex.strPSource = tbFSource.Lines;
             Synt.Lex.strPMessage = tbFMessage.Lines;
             Synt.Lex.enumPState = TState.Start;
@@ -412,12 +413,13 @@ namespace Translator
         private TreeNode CreateNodeWithLeaves(string rootText, string nodeText, List<string> leaves, TreeV parserTree)
         {
             var rootNode = new TreeNode(rootText);
+
             var intermediateNode = new TreeNode(nodeText);
 
             foreach (var leaf in leaves)
             {
                 var leafNode = new TreeNode(leaf);
-                SetSpecificNodeColor(leafNode, rootNode, parserTree);
+                SetSpecificNodeColor(leafNode, rootNode, parserTree, intermediateNode);
                 intermediateNode.Nodes.Add(leafNode);
             }
 
@@ -426,9 +428,9 @@ namespace Translator
         }
 
         // Функция для закрашивания определенного узла
-        public void SetSpecificNodeColor(TreeNode targetNode, TreeNode root, TreeV parserTree)
+        public void SetSpecificNodeColor(TreeNode targetNode, TreeNode root, TreeV parserTree, TreeNode intermediateNode)
         {
-            if (root.Text == parserTree.firstSymbol && targetNode.Text == parserTree.identifier) // Проверяем узел
+            if (root.Text == parserTree.firstSymbol && targetNode.Text == parserTree.identifier && intermediateNode.Text.StartsWith(parserTree.firstValue.Substring(0, 2)) && parserTree.isValidSequence) // Проверяем узел
                 targetNode.BackColor = Color.Green;
             else if (root.Text == parserTree.firstSymbol)
                 targetNode.BackColor = Color.Red;

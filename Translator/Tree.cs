@@ -17,10 +17,11 @@ namespace Tree
         public Dictionary<string, int> initializedVariables = new Dictionary<string, int>();
         public string lastVariable;
         int flagCount = 0;
-        string lastValue;
-        bool isValidSequence = true;
+        public string lastValue;
+        public bool isValidSequence = true;
         public string identifier;
         public string firstSymbol;
+        public string firstValue;
         public TreeV(TreeView treeView)
         {
             tree = treeView;
@@ -206,6 +207,7 @@ namespace Tree
                         if (flagCount == 1)
                         {
                             firstSymbol = lastVariable;
+                            firstValue = lastValue;
                             if (lastVariable == "a" && lastValue.ToString().StartsWith("001001"))
                             {
                                 if (!(new List<string> { "ac", "ad", "acc" }).Contains(identifier))

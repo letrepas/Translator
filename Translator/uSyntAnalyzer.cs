@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
+using System.Windows.Forms;
 using Translator;
 
 namespace nsSynt
@@ -82,10 +83,15 @@ namespace nsSynt
                                     string var2 = Lex.CurrentTokenValue();
                                     if (var1 == var2)
                                         throw new Exception("Идентификаторы var1 и var2 не должны быть одинаковыми!");
-                                    if (!initializedVariables.ContainsKey(var2))
+                                    if (!initializedVariables.ContainsKey(var2) && isValidSequence == true)
                                         throw new Exception($"Переменная {var2} не инициализирована!");
-                                    int value2 = initializedVariables[var2];
-                                    Points.Add(value2);
+                                    if (isValidSequence)
+                                    {
+                                        int value2 = initializedVariables[var2];
+                                        Points.Add(value2);
+                                    }
+                                    else
+                                        throw new Exception($"Ошибка: Идентификатор не соответствует правилу");
                                     Lex.NextToken();
                                     if (Lex.enumPToken == TToken.lxmEndBracket)  // проверка на закрывающую скобку
                                         Lex.NextToken();  // завершаем разбор COMMAND "LINE"
@@ -169,22 +175,34 @@ namespace nsSynt
                             if (lastVariable == "a" && lastValue.ToString().StartsWith("001001"))
                             {
                                 if (!(new List<string> { "ac", "ad", "acc" }).Contains(identifier))
+                                {
+                                    isValidSequence = false;
                                     throw new Exception("Ошибка в перввом правиле");
+                                }
                             }
                             else if (lastVariable == "a" && lastValue.StartsWith("00"))
                             {
                                 if (!(new List<string> { "abc", "ab", "abcd", "aacd" }).Contains(identifier))
+                                {
+                                    isValidSequence = false;
                                     throw new Exception("Ошибка во втором правиле");
+                                }
                             }
                             else if ((new List<string> { "abc", "ab", "abcd", "aacd" }).Contains(lastVariable) && ToString().StartsWith("00"))
                             {
                                 if (identifier != "a")
+                                {
+                                    isValidSequence = false;
                                     throw new Exception("Ошибка в третьем правиле");
+                                }
                             }
                             else if ((new List<string> { "ac", "ad", "acc" }).Contains(lastVariable) && lastValue.StartsWith("001001"))
                             {
                                 if (identifier != "a")
+                                {
+                                    isValidSequence = false;
                                     throw new Exception("Ошибка в четвертом правиле");
+                                }
                             }
                         }
 
@@ -199,7 +217,11 @@ namespace nsSynt
                             Lex.NextToken();
                         }
                         else
+                        {
                             Lex.NextToken();
+                            flagCount = 0;
+                        }
+                            
                     }
                     else throw new Exception("Ожидался числовое значение");
                 }
