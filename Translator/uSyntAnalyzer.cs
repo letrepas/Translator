@@ -10,7 +10,10 @@ namespace nsSynt
     {
         public CLex Lex = new CLex();
         public Dictionary<string, int> initializedVariables = new Dictionary<string, int>();
-
+        string lastVariable;
+        int flagCount = 0;
+        string lastValue;
+        bool isValidSequence = true;
         List<int> points = new List<int>();
         public List<int> Points
         {
@@ -161,10 +164,42 @@ namespace nsSynt
                             }
                         }
 
-                        // Преобразуем значение токена в десятичное число и инициализируем переменную
-                        int value = ConvertBinaryToDecimal(binaryValue);
-                        initializedVariables[identifier] = value;
-                        Lex.NextToken();
+                        if (flagCount == 1)
+                        {
+                            if (lastVariable == "a" && lastValue.ToString().StartsWith("001001"))
+                            {
+                                if (!(new List<string> { "ac", "ad", "acc" }).Contains(identifier))
+                                    throw new Exception("Ошибка в перввом правиле");
+                            }
+                            else if (lastVariable == "a" && lastValue.StartsWith("00"))
+                            {
+                                if (!(new List<string> { "abc", "ab", "abcd", "aacd" }).Contains(identifier))
+                                    throw new Exception("Ошибка во втором правиле");
+                            }
+                            else if ((new List<string> { "abc", "ab", "abcd", "aacd" }).Contains(lastVariable) && ToString().StartsWith("00"))
+                            {
+                                if (identifier != "a")
+                                    throw new Exception("Ошибка в третьем правиле");
+                            }
+                            else if ((new List<string> { "ac", "ad", "acc" }).Contains(lastVariable) && lastValue.StartsWith("001001"))
+                            {
+                                if (identifier != "a")
+                                    throw new Exception("Ошибка в четвертом правиле");
+                            }
+                        }
+
+                        if (isValidSequence)
+                        {
+                            flagCount++;
+                            lastVariable = identifier;
+                            lastValue = binaryValue;
+                            // Преобразуем значение токена в десятичное число и инициализируем переменную
+                            int value = ConvertBinaryToDecimal(binaryValue);
+                            initializedVariables[identifier] = value;
+                            Lex.NextToken();
+                        }
+                        else
+                            Lex.NextToken();
                     }
                     else throw new Exception("Ожидался числовое значение");
                 }

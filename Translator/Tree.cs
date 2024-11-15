@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
+using System.Runtime.ExceptionServices;
 using System.Windows.Forms;  // Для работы с TreeView
 using Translator;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
@@ -14,11 +15,12 @@ namespace Tree
         public CLex Lex = new CLex();
         public TreeView tree;
         public Dictionary<string, int> initializedVariables = new Dictionary<string, int>();
-        string lastVariable;
+        public string lastVariable;
         int flagCount = 0;
         string lastValue;
         bool isValidSequence = true;
         public string identifier;
+        public string firstSymbol;
         public TreeV(TreeView treeView)
         {
             tree = treeView;
@@ -203,6 +205,7 @@ namespace Tree
 
                         if (flagCount == 1)
                         {
+                            firstSymbol = lastVariable;
                             if (lastVariable == "a" && lastValue.ToString().StartsWith("001001"))
                             {
                                 if (!(new List<string> { "ac", "ad", "acc" }).Contains(identifier))

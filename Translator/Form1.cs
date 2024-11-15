@@ -19,6 +19,7 @@ namespace Translator
         uSyntAnalyzer Synt = new uSyntAnalyzer();
         private DrawTreeNodeEventHandler customDrawNodeHandler;
         public TreeV parserTree;
+        int notUsed = 0;
 
         public Form1()
         {
@@ -382,121 +383,55 @@ namespace Translator
         public void CreateSampleTree(TreeView treeView2, TreeV parserTree)
         {
             treeView2.Nodes.Clear();
-            // Первый вариант: a -> 001001... -> ac | ad | acc
-            TreeNode root1 = new TreeNode("a");
-            TreeNode node1 = new TreeNode("001001...");
-            TreeNode acNode = new TreeNode("ac");
-            TreeNode adNode = new TreeNode("ad");
-            TreeNode accNode = new TreeNode("acc");
 
-            node1.Nodes.Add(acNode);
-            node1.Nodes.Add(adNode);
-            node1.Nodes.Add(accNode);
-            SetSpecificNodeColor(treeView2, acNode, Brushes.Green, Brushes.White, parserTree); // Закрашиваем "ac"
-            root1.Nodes.Add(node1);
-            treeView2.Nodes.Add(root1);
+            // Данные для всех вариантов
+            var variants = new List<(string root, string node, List<string> leaves)>
+    {
+        ("a", "001001...", new List<string> { "ac", "ad", "acc" }),
+        ("a", "00...", new List<string> { "abc", "ab", "abcd", "aacd" }),
+        ("abc", "00...", new List<string> { "a" }),
+        ("ab", "00...", new List<string> { "a" }),
+        ("abcd", "00...", new List<string> { "a" }),
+        ("aacd", "00...", new List<string> { "a" }),
+        ("ac", "001001...", new List<string> { "a" }),
+        ("ad", "001001...", new List<string> { "a" }),
+        ("acc", "001001...", new List<string> { "a" })
+    };
 
-
-            // Второй вариант: a -> 00... -> abc | ab | abcd | aacd
-            TreeNode node2 = new TreeNode("00...");
-            TreeNode abNode = new TreeNode("ab");
-            TreeNode abсNode = new TreeNode("abc");
-            TreeNode abcdNode = new TreeNode("abcd");
-            TreeNode aacdNode = new TreeNode("aacd");
-
-            node2.Nodes.Add(abNode);
-            node2.Nodes.Add(abсNode);
-            node2.Nodes.Add(abcdNode);
-            node2.Nodes.Add(aacdNode);
-            SetSpecificNodeColor(treeView2, abсNode, Brushes.Green, Brushes.White, parserTree);
-
-            TreeNode root2 = new TreeNode("a");
-            root2.Nodes.Add(node2);
-            treeView2.Nodes.Add(root2);
-
-            // Третий вариант: abc -> 00... -> a
-            TreeNode root3 = new TreeNode("abc");
-            TreeNode node3 = new TreeNode("00...");
-            node3.Nodes.Add(new TreeNode("a"));
-            root3.Nodes.Add(node3);
-            treeView2.Nodes.Add(root3);
-
-            // Четвёртый вариант: ab -> 00... -> a
-            TreeNode root4 = new TreeNode("ab");
-            TreeNode node4 = new TreeNode("00...");
-            node4.Nodes.Add(new TreeNode("a"));
-            root4.Nodes.Add(node4);
-            treeView2.Nodes.Add(root4);
-
-            // Пятый вариант: abcd -> 00... -> a
-            TreeNode root5 = new TreeNode("abcd");
-            TreeNode node5 = new TreeNode("00...");
-            node5.Nodes.Add(new TreeNode("a"));
-            root5.Nodes.Add(node5);
-            treeView2.Nodes.Add(root5);
-
-            // Шестой вариант: aacd -> 00... -> a
-            TreeNode root6 = new TreeNode("aacd");
-            TreeNode node6 = new TreeNode("00...");
-            node6.Nodes.Add(new TreeNode("a"));
-            root6.Nodes.Add(node6);
-            treeView2.Nodes.Add(root6);
-
-            // Седьмой вариант: ac -> 001001... -> a
-            TreeNode root7 = new TreeNode("ac");
-            TreeNode node7 = new TreeNode("001001...");
-            node7.Nodes.Add(new TreeNode("a"));
-            root7.Nodes.Add(node7);
-            treeView2.Nodes.Add(root7);
-
-            // Восьмой вариант: ad -> 001001... -> a
-            TreeNode root8 = new TreeNode("ad");
-            TreeNode node8 = new TreeNode("001001...");
-            node8.Nodes.Add(new TreeNode("a"));
-            root8.Nodes.Add(node8);
-            treeView2.Nodes.Add(root8);
-
-            // Девятый вариант: acc -> 001001... -> a
-            TreeNode root9 = new TreeNode("acc");
-            TreeNode node9 = new TreeNode("001001...");
-            node9.Nodes.Add(new TreeNode("a"));
-            root9.Nodes.Add(node9);
-            treeView2.Nodes.Add(root9);
-
-            treeView2.ExpandAll(); // Раскрыть все узлы
-        }
-        // Функция для закрашивания определенного узла
-        public void SetSpecificNodeColor(TreeView treeView, TreeNode targetNode, Brush backgroundColor, Brush textColor, TreeV parserTree)
-        {
-            // Устанавливаем режим пользовательской отрисовки
-            treeView.DrawMode = TreeViewDrawMode.OwnerDrawText;
-
-            // Убираем старый обработчик, если он был установлен
-            if (customDrawNodeHandler != null)
+            foreach (var (rootText, nodeText, leaves) in variants)
             {
-                treeView.DrawNode -= customDrawNodeHandler;
+                var rootNode = CreateNodeWithLeaves(rootText, nodeText, leaves, parserTree);
+                treeView2.Nodes.Add(rootNode);
             }
 
-            // Определяем новый обработчик
-            customDrawNodeHandler = (sender, e) =>
+            treeView2.ExpandAll(); // Раскрыть все узлы
+            notUsed = 0;
+        }
+
+        // Вспомогательная функция для создания узла с листьями
+        private TreeNode CreateNodeWithLeaves(string rootText, string nodeText, List<string> leaves, TreeV parserTree)
+        {
+            var rootNode = new TreeNode(rootText);
+            var intermediateNode = new TreeNode(nodeText);
+
+            foreach (var leaf in leaves)
             {
-                if (e.Node == targetNode && e.Node.Text == parserTree.identifier) // Проверяем узел
-                {
-                    // Закрашиваем фон и текст
-                    e.Graphics.FillRectangle(backgroundColor, e.Bounds);
-                    e.Graphics.DrawString(e.Node.Text, treeView.Font, textColor, e.Bounds);
-                }
-                else
-                {
-                    e.DrawDefault = true; // Используем стандартную отрисовку
-                }
-            };
+                var leafNode = new TreeNode(leaf);
+                SetSpecificNodeColor(leafNode, rootNode, parserTree);
+                intermediateNode.Nodes.Add(leafNode);
+            }
 
-            // Привязываем новый обработчик
-            treeView.DrawNode += customDrawNodeHandler;
+            rootNode.Nodes.Add(intermediateNode);
+            return rootNode;
+        }
 
-            // Перерисовываем дерево
-            treeView.Invalidate();
+        // Функция для закрашивания определенного узла
+        public void SetSpecificNodeColor(TreeNode targetNode, TreeNode root, TreeV parserTree)
+        {
+            if (root.Text == parserTree.firstSymbol && targetNode.Text == parserTree.identifier) // Проверяем узел
+                targetNode.BackColor = Color.Green;
+            else if (root.Text == parserTree.firstSymbol)
+                targetNode.BackColor = Color.Red;
         }
     }
 }
