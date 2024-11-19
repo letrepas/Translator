@@ -188,7 +188,7 @@ namespace nsSynt
                                     throw new Exception("Ошибка во втором правиле");
                                 }
                             }
-                            else if ((new List<string> { "abc", "ab", "abcd", "aacd" }).Contains(lastVariable) && ToString().StartsWith("00"))
+                            else if ((new List<string> { "ac", "ad", "acc" }).Contains(lastVariable) && lastValue.StartsWith("001001"))
                             {
                                 if (identifier != "a")
                                 {
@@ -196,7 +196,7 @@ namespace nsSynt
                                     throw new Exception("Ошибка в третьем правиле");
                                 }
                             }
-                            else if ((new List<string> { "ac", "ad", "acc" }).Contains(lastVariable) && lastValue.StartsWith("001001"))
+                            else if ((new List<string> { "abc", "ab", "abcd", "aacd" }).Contains(lastVariable) && lastValue.StartsWith("00"))
                             {
                                 if (identifier != "a")
                                 {
