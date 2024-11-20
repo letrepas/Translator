@@ -20,6 +20,7 @@ namespace Translator
         private DrawTreeNodeEventHandler customDrawNodeHandler;
         public TreeV parserTree;
         int notUsed = 0;
+        List<string> intermediateCode;
 
         public Form1()
         {
@@ -76,7 +77,7 @@ namespace Translator
                         Synt.Lex.enumPState = TState.Start;  // Возвращаем состояние в начало
                 }
                 throw new Exception("Текст верный"); // Успешное завершение
-
+                
             }
 
             catch (Exception exc)
@@ -93,6 +94,7 @@ namespace Translator
                 {
                     isFirstButtonValid = true;  // В случае успеха устанавливаем true
                     writeButton.Enabled = true;  // Разблокируем кнопку
+                    intermediateCode = Synt.GetIntermediateCode();
                     drawingPanel.Invalidate();
                 }
                 else
@@ -434,6 +436,13 @@ namespace Translator
                 targetNode.BackColor = Color.Green;
             else if (root.Text == parserTree.firstSymbol)
                 targetNode.BackColor = Color.Red;
+        }
+
+        private void button3_Click(object sender, EventArgs e)
+        {
+            listBox4.Items.Clear();
+            foreach (string codeLine in intermediateCode)
+                listBox4.Items.Add(codeLine);
         }
     }
 }

@@ -16,6 +16,8 @@ namespace nsSynt
         string lastValue;
         bool isValidSequence = true;
         List<int> points = new List<int>();
+        private List<string> intermediateCode = new List<string>();
+        int rCount = 0;
         public List<int> Points
         {
             get { return points; }  // Возвращаем текущий список точек
@@ -92,6 +94,8 @@ namespace nsSynt
                                     }
                                     else
                                         throw new Exception($"Ошибка: Идентификатор не соответствует правилу");
+                        
+                                    intermediateCode.Add($"TEST {isValidSequence}");
                                     Lex.NextToken();
                                     if (Lex.enumPToken == TToken.lxmEndBracket)  // проверка на закрывающую скобку
                                         Lex.NextToken();  // завершаем разбор COMMAND "LINE"
@@ -133,6 +137,8 @@ namespace nsSynt
             if (Lex.enumPToken == TToken.lxmIdentifier)  // ожидаем индефикатор
             {
                 string identifier = Lex.CurrentTokenValue();
+                // Генерация промежуточного кода
+                intermediateCode.Add($"MOV {identifier} R{rCount++}");
                 // Проверяем, был ли идентификатор уже инициализирован
                 if (initializedVariables.ContainsKey(identifier))
                     throw new Exception($"Идентификатор {identifier} уже инициализирован!");
@@ -208,6 +214,7 @@ namespace nsSynt
 
                         if (isValidSequence)
                         {
+                            intermediateCode.Add($"MOV {binaryValue} R{rCount++}");
                             flagCount++;
                             lastVariable = identifier;
                             lastValue = binaryValue;
@@ -232,6 +239,10 @@ namespace nsSynt
         public int ConvertBinaryToDecimal(string binaryCode)
         {
             return Convert.ToInt32(binaryCode, 2);
+        }
+        public List<string> GetIntermediateCode()
+        {
+            return new List<string>(intermediateCode);
         }
     }
 }
