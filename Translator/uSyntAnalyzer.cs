@@ -50,15 +50,18 @@ namespace nsSynt
 
                 if (Lex.enumPToken == TToken.lxmSETQ)  // разбор SETQ
                 {
+                    
                     Lex.NextToken();  // переходим после SETQ
                     if (Lex.enumPToken == TToken.lxmSpace)  // проверка на пробел
                     {
                         Lex.NextToken();
                         V();  // после пробела ожидается V (переменная или список)
+                        intermediateCode.Add("END SETQ");
                         if (Lex.enumPToken == TToken.lxmEndBracket)
                         {
                             // Успешно завершили разбор SETQ
                         }
+
                         else throw new Exception("Ожидалась закрывающая скобка");
                     }
                     else throw new Exception("Ожидался пробел после SETQ");
@@ -94,8 +97,8 @@ namespace nsSynt
                                     }
                                     else
                                         throw new Exception($"Ошибка: Идентификатор не соответствует правилу");
-                        
                                     intermediateCode.Add($"TEST {isValidSequence}");
+                                    intermediateCode.Add("END COMMAND \"LINE\"");
                                     Lex.NextToken();
                                     if (Lex.enumPToken == TToken.lxmEndBracket)  // проверка на закрывающую скобку
                                         Lex.NextToken();  // завершаем разбор COMMAND "LINE"
@@ -215,6 +218,7 @@ namespace nsSynt
                         if (isValidSequence)
                         {
                             intermediateCode.Add($"MOV {binaryValue} R{rCount++}");
+                            intermediateCode.Add($"MOV {identifier} {binaryValue}");
                             flagCount++;
                             lastVariable = identifier;
                             lastValue = binaryValue;
