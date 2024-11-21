@@ -16,7 +16,7 @@ namespace nsSynt
         string lastValue;
         bool isValidSequence = true;
         List<int> points = new List<int>();
-        private List<string> intermediateCode = new List<string>();
+        List<string> intermediateCode = new List<string>();
         int rCount = 0;
         public List<int> Points
         {
@@ -50,7 +50,7 @@ namespace nsSynt
 
                 if (Lex.enumPToken == TToken.lxmSETQ)  // разбор SETQ
                 {
-                    
+                    intermediateCode.Add("START SETQ");
                     Lex.NextToken();  // переходим после SETQ
                     if (Lex.enumPToken == TToken.lxmSpace)  // проверка на пробел
                     {
@@ -68,6 +68,7 @@ namespace nsSynt
                 }
                 else if (Lex.enumPToken == TToken.lxmCL)  // разбор COMMAND"LINE"
                 {
+                    intermediateCode.Add("START COMMAND \"LINE\"");
                     Lex.NextToken();  // переходим к следующему токену после COMMAND
                     if (Lex.enumPToken == TToken.lxmSpace)  // проверка на пробел
                     {
@@ -97,11 +98,12 @@ namespace nsSynt
                                     }
                                     else
                                         throw new Exception($"Ошибка: Идентификатор не соответствует правилу");
-                                    intermediateCode.Add($"TEST {isValidSequence}");
                                     intermediateCode.Add("END COMMAND \"LINE\"");
+                                    intermediateCode.Add($"TEST {isValidSequence}");
                                     Lex.NextToken();
                                     if (Lex.enumPToken == TToken.lxmEndBracket)  // проверка на закрывающую скобку
                                         Lex.NextToken();  // завершаем разбор COMMAND "LINE"
+
                                     else throw new Exception("Ожидалась закрывающая скобка");
                                 }
                                 else throw new Exception("Ожидался второй индефикатор для LINE");
